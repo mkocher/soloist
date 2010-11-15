@@ -1,0 +1,3 @@
+module Soloist
+  # Your code goes here...
+end
