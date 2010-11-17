@@ -12,12 +12,6 @@ def fileify(contents)
   file
 end
 
-class Array
-  def to_array_string
-    "[\"#{self.join("\", \"")}\"]"
-  end
-end
-
 def walk_up_and_find_file(filenames)
   pwd = FileUtils.pwd
   file = nil
@@ -28,18 +22,25 @@ def walk_up_and_find_file(filenames)
     path_to_file << "../" unless file
   end
   FileUtils.cd(pwd)
-  File.read(path_to_file + file) if file
+  file_contents = File.read(path_to_file + file) if file
+  [file_contents, path_to_file]
 end
 
 log_level = ENV['LOG_LEVEL'] || "info"
 
-soloistrc = YAML.load(walk_up_and_find_file(["soloistrc"]))
+solistrc_contents, soloistrc_path = walk_up_and_find_file(["soloistrc"])
+soloistrc = YAML.load(solistrc_contents)
 
 json_contents = {
   :recipes => soloistrc["Recipes"]
 }
 
-solo_rb_contents = "cookbook_path #{soloistrc["Cookbook_Paths"].to_array_string}"
+cookbook_paths = soloistrc["Cookbook_Paths"].map do |v|
+  (v =~ /\//) == 0 ? v : "#{FileUtils.pwd}/#{soloistrc_path}/#{v}"
+end
+puts FileUtils.pwd
+puts cookbook_paths.inspect
+solo_rb_contents = "cookbook_path #{cookbook_paths.inspect}"
 
 # if ARGV.length >= 1
 #   json_config = JSON.parse(File.read(json_file))
