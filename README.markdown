@@ -1,10 +1,48 @@
+Soloist: Making chef-solo easier
+================================
+
+# Why?
+You just want to use chef solo, not worry about where your config files are, or what they should look like (too much).
+
+# How?
+Soloist is a script packaged as a gem which when run recurses up the file tree looking for a soloistrc file.  When it finds it, it uses it to determine 1) WHere its cookbooks are and 2) What recipes to run.  It generates the necessary config files for chef solo, and kicks it off.
+
+# That's exactly what I've always wanted! How do I use it?
+* (sudo) gem install soloist
+* create a directory to store your cookbooks in, and get a cookbook: 
+	bash sh -c 'mkdir -p chef/pivotal_workstation && cd chef/pivotal_workstation && \
+	curl -L http://github.com/mkocher/pivotal_workstation/tarball/master | \ 
+	| tar xvf - --strip=1'
+* create your soloistrc file in the root of your project.
+
+# What if I'm just setting up my own machine, and have many projects?
+Just put your soloistrc file in your home directory, and point it to wherever you want to keep your cookbooks. Or just dedicate a git repo to it, and go into that directory before running soloist.
+
+# How do I write a solistrc file?
+It's a yaml file, currently with two lists to maintain:
+
+The first, _Cookbook\_Paths_, should point (using an absolute or path relative to your soloistrc file) to the directory containing your cookbooks, such was pivotal_workstation.
+
+The second, _Recipes_ should be a list of recipes you wish to run.
+
+# Then What?
+$> soloist
+
+
 Example soloistrc Files
 =======================
 
-My Laptop
+directory layout:
+
+/Users/mkocher/workspace/project/soloistrc <-Config File
+/Users/mkocher/workspace/project/chef/
+/Users/mkocher/workspace/project/chef/cookbooks/pivotal\_workstation/
+
+
+soloistrc
 ---------
   	Cookbook_Paths:
-  	- /Users/pivotal/chef/
+  	- ./chef/cookbooks/
   	Recipes:
   	- pivotal_workstation::text_mate
   	- pivotal_workstation::git
@@ -20,5 +58,4 @@ My Laptop
   	- pivotal_workstation::rvm
   	- pivotal_workstation::mysql
   	- pivotal_workstation::defaults_fast_key_repeat_rate
-  	- pivotal_workstation::ssh_copy_id
   	- pivotal_workstation::ec2_api_tools
