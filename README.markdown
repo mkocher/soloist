@@ -2,7 +2,7 @@ Soloist: Making chef-solo easier
 ================================
 
 # Why?
-You just want to use chef solo, not worry about where your config files are, or what they should look like (too much).
+You just want to use chef solo, not worry about where your config files are, or what they should look like (too much).  You might think that json is a data serialization format and not a config file format.  You might think that having two config files that you have to pass to an executable every time you run it is two too many.
 
 # How?
 Soloist is a script packaged as a gem which when run recurses up the file tree looking for a soloistrc file.  When it finds it, it uses it to determine 1) Where its cookbooks are and 2) What recipes to run.  It generates the necessary config files for chef solo, and kicks it off.
