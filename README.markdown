@@ -34,7 +34,7 @@ directory layout:
 
     /Users/mkocher/workspace/project/soloistrc <-Config File
     /Users/mkocher/workspace/project/chef/
-    /Users/mkocher/workspace/project/chef/cookbooks/pivotal\_workstation/
+    /Users/mkocher/workspace/project/chef/cookbooks/pivotal_workstation/
 
 
 soloistrc
