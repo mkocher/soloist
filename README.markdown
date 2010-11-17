@@ -5,14 +5,12 @@ Soloist: Making chef-solo easier
 You just want to use chef solo, not worry about where your config files are, or what they should look like (too much).
 
 # How?
-Soloist is a script packaged as a gem which when run recurses up the file tree looking for a soloistrc file.  When it finds it, it uses it to determine 1) WHere its cookbooks are and 2) What recipes to run.  It generates the necessary config files for chef solo, and kicks it off.
+Soloist is a script packaged as a gem which when run recurses up the file tree looking for a soloistrc file.  When it finds it, it uses it to determine 1) Where its cookbooks are and 2) What recipes to run.  It generates the necessary config files for chef solo, and kicks it off.
 
 # That's exactly what I've always wanted! How do I use it?
 * (sudo) gem install soloist
 * create a directory to store your cookbooks in, and get a cookbook: 
-	bash sh -c 'mkdir -p chef/pivotal_workstation && cd chef/pivotal_workstation && \
-	curl -L http://github.com/mkocher/pivotal_workstation/tarball/master | \ 
-	| tar xvf - --strip=1'
+	bash sh -c 'mkdir pivotal_workstation && cd pivotal_workstation &&  curl -L http://github.com/mkocher/pivotal_workstation/tarball/master |  gunzip | tar xvf - --strip=1'
 * create your soloistrc file in the root of your project.
 
 # What if I'm just setting up my own machine, and have many projects?
@@ -34,9 +32,9 @@ Example soloistrc Files
 
 directory layout:
 
-/Users/mkocher/workspace/project/soloistrc <-Config File
-/Users/mkocher/workspace/project/chef/
-/Users/mkocher/workspace/project/chef/cookbooks/pivotal\_workstation/
+    /Users/mkocher/workspace/project/soloistrc <-Config File
+    /Users/mkocher/workspace/project/chef/
+    /Users/mkocher/workspace/project/chef/cookbooks/pivotal\_workstation/
 
 
 soloistrc
