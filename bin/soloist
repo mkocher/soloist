@@ -6,7 +6,7 @@ require 'yaml'
 require 'tempfile'
 
 def fileify(contents)
-  file = Tempfile.new("sololist")
+  file = Tempfile.new("soloist")
   file << contents
   file.flush
   file
@@ -28,8 +28,8 @@ end
 
 log_level = ENV['LOG_LEVEL'] || "info"
 
-solistrc_contents, soloistrc_path = walk_up_and_find_file(["soloistrc"])
-soloistrc = YAML.load(solistrc_contents)
+soloistrc_contents, soloistrc_path = walk_up_and_find_file(["soloistrc"])
+soloistrc = YAML.load(soloistrc_contents)
 
 json_contents = {
   :recipes => soloistrc["Recipes"]
