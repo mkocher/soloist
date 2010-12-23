@@ -53,7 +53,12 @@ solo_rb_contents = "cookbook_path #{cookbook_paths.inspect}"
 solo_rb = fileify(solo_rb_contents)
 metadata_json = fileify(json_contents.to_json)
 
-command = "sudo bash -c 'RAILS_ENV=$RAILS_ENV chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
+env_vars = ["PATH=#{ENV['PATH']}"]
+%w{BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV}.each do |v|
+  env_vars << "#{v}=#{ENV[v]}" unless ENV[v].nil?
+end
+
+command = "sudo bash -c '#{env_vars.join(' ')} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
 
 puts "running chef: " + command
 system(command) || exit(1)
