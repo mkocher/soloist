@@ -40,7 +40,7 @@ solo_rb = fileify(config_generator.solo_rb)
 metadata_json = fileify(config_generator.json_file)
 
 env_vars = ["PATH=#{ENV['PATH']}"]
-%w{BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV}.each do |v|
+%w{BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}.each do |v|
   env_vars << "#{v}=#{ENV[v]}" unless ENV[v].nil?
 end
 
