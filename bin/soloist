@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-require "json"
-require 'fileutils'
-require 'yaml'
-require 'tempfile'
+require 'soloist'
 
 def fileify(contents)
   file = Tempfile.new("soloist")
@@ -29,18 +26,7 @@ end
 log_level = ENV['LOG_LEVEL'] || "info"
 
 soloistrc_contents, soloistrc_path = walk_up_and_find_file(["soloistrc"])
-soloistrc = YAML.load(soloistrc_contents)
-
-json_contents = {
-  :recipes => soloistrc["Recipes"]
-}
-
-cookbook_paths = soloistrc["Cookbook_Paths"].map do |v|
-  (v =~ /\//) == 0 ? v : "#{FileUtils.pwd}/#{soloistrc_path}/#{v}"
-end
-puts FileUtils.pwd
-puts cookbook_paths.inspect
-solo_rb_contents = "cookbook_path #{cookbook_paths.inspect}"
+config_generator = ChefConfigGenerator.new(soloistrc_contents, soloistrc_path)
 
 # if ARGV.length >= 1
 #   json_config = JSON.parse(File.read(json_file))
@@ -50,8 +36,8 @@ solo_rb_contents = "cookbook_path #{cookbook_paths.inspect}"
 #   File.open(json_file, "w+"){|f| f<<JSON.pretty_generate(json_config) }
 # end
 
-solo_rb = fileify(solo_rb_contents)
-metadata_json = fileify(json_contents.to_json)
+solo_rb = fileify(config_generator.solo_rb)
+metadata_json = fileify(config_generator.json_file)
 
 env_vars = ["PATH=#{ENV['PATH']}"]
 %w{BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV}.each do |v|

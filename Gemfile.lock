@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    soloist (0.0.2)
+    soloist (0.0.3)
       chef (= 0.9.12)
       json (= 1.4.6)
 
@@ -24,6 +24,7 @@ GEM
       ohai (>= 0.5.7)
       rest-client (>= 1.0.4, < 1.7.0)
       uuidtools
+    diff-lcs (1.1.2)
     erubis (2.6.6)
       abstract (>= 1.0.0)
     extlib (0.9.15)
@@ -45,13 +46,20 @@ GEM
       systemu
     rest-client (1.6.1)
       mime-types (>= 1.16)
+    rspec (2.4.0)
+      rspec-core (~> 2.4.0)
+      rspec-expectations (~> 2.4.0)
+      rspec-mocks (~> 2.4.0)
+    rspec-core (2.4.0)
+    rspec-expectations (2.4.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.4.0)
     systemu (1.2.0)
-    uuidtools (2.1.1)
+    uuidtools (2.1.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  chef (= 0.9.12)
-  json (= 1.4.6)
+  rspec (= 2.4.0)
   soloist!

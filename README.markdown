@@ -39,9 +39,9 @@ directory layout:
 
 soloistrc
 ---------
-	Cookbook_Paths:
+	cookbook_paths:
 	- ./chef/cookbooks/
-	Recipes:
+	recipes:
 	- pivotal_workstation::ack
 	- pivotal_workstation::bash_path_order
 	- pivotal_workstation::bash_profile
@@ -65,3 +65,19 @@ soloistrc
 	- pivotal_workstation::turn_on_ssh
 	- pivotal_workstation::user_owns_usr_local
 	- pivotal_workstation::workspace_directory
+
+Environment Variable Switching (Alpha)
+======================================
+I'm undecided on how recipes should be selected once you get to the point of running chef on various platforms and on boxes with different roles.  I'm trying out adding support in the soloistrc file for selecting recipes based on environment variables.  Cap should allow setting environment variables fairly easily, and they can be set permanently on the machine if desired.  To use these, add a env_variable_switches key to your soloistrc.  They keys of the hash should be the environment variable you wish to change the configuration based on, and the value should be a hash keyed by the value of the environment variable.  It's easier than it sounds - see the example below. (NB: Note that the CamelSnake is gone in the soloistrc, and while the basic config accepts the old keys, environment variable switching requires snake case keys)
+
+	cookbook_paths:
+	- ./chef/cookbooks/
+	recipes:
+	- pivotal_workstation::ack
+	env_variable_switches:
+	  RACK_ENV:
+	    development:
+	      cookbook_paths:
+	      - ./chef/dev_cookbooks/
+	      recipes:
+	      - pivotal_dev::foo
