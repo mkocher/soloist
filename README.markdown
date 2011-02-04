@@ -68,7 +68,7 @@ soloistrc
 
 Environment Variable Switching (Alpha)
 ======================================
-I'm undecided on how recipes should be selected once you get to the point of running chef on various platforms and on boxes with different roles.  I'm trying out adding support in the soloistrc file for selecting recipes based on environment variables.  Cap should allow setting environment variables fairly easily, and they can be set permanently on the machine if desired.  To use these, add a env_variable_switches key to your soloistrc.  They keys of the hash should be the environment variable you wish to change the configuration based on, and the value should be a hash keyed by the value of the environment variable.  It's easier than it sounds - see the example below. (NB: Note that the CamelSnake is gone in the soloistrc, and while the basic config accepts the old keys, environment variable switching requires snake case keys)
+I'm trying out adding support in the soloistrc file for selecting recipes based on environment variables.  Cap should allow setting environment variables fairly easily on deploy, and they can be set permanently on the machine if desired.  To use these, add a env_variable_switches key to your soloistrc.  They keys of the hash should be the environment variable you wish to change the configuration based on, and the value should be a hash keyed by the value of the variable.  It's easier than it sounds - see the example below. (NB: Note that the CamelSnake is gone in the soloistrc, and while the basic config accepts the old keys, environment variable switching requires snake case keys)
 
 	cookbook_paths:
 	- ./chef/cookbooks/
@@ -81,3 +81,14 @@ I'm undecided on how recipes should be selected once you get to the point of run
 	      - ./chef/dev_cookbooks/
 	      recipes:
 	      - pivotal_dev::foo
+
+The values are merged in, so this results in a cookbook path of
+	[
+      "./chef/cookbooks/",
+      "./chef/dev_cookbooks/"
+    ]
+and a recipe list of
+	[
+	  "pivotal_workstation::ack", 
+	  "pivotal_dev::foo"
+	]
