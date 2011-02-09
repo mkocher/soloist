@@ -42,4 +42,17 @@ class ChefConfigGenerator
   def json_file
     json_hash.to_json
   end
+  
+  def preserved_environment_variables
+    always_passed = %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
+    always_passed += @hash["env_variable_switches"].keys if @hash["env_variable_switches"]
+    always_passed
+  end
+  
+  def preserved_environment_variables_string
+    variable_array = []
+    preserved_environment_variables.map do |env_variable|
+      "#{env_variable}=#{ENV[env_variable]}" unless ENV[env_variable].nil?
+    end.compact.join(" ")
+  end
 end

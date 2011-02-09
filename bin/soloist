@@ -39,12 +39,7 @@ config_generator = ChefConfigGenerator.new(soloistrc_contents, soloistrc_path)
 solo_rb = fileify(config_generator.solo_rb)
 metadata_json = fileify(config_generator.json_file)
 
-env_vars = ["PATH=#{ENV['PATH']}"]
-%w{BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}.each do |v|
-  env_vars << "#{v}=#{ENV[v]}" unless ENV[v].nil?
-end
-
-command = "sudo bash -c '#{env_vars.join(' ')} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
+command = "sudo bash -c '#{config_generator.preserved_environment_variables_string} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
 
 puts "running chef: " + command
 system(command) || exit(1)

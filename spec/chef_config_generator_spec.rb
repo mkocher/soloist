@@ -33,6 +33,37 @@ CONFIG
         "recipes" => ['pivotal_workstation::ack']
       }
     end
+    
+    describe "passing env variables to chef-solo through sudo" do
+      it "has a list of env variables which are passed through" do
+        @generator.preserved_environment_variables.should == %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
+      end
+    
+      it "can generate an env_variable_string which is passed through sudo to chef-solo" do
+        ENV["FOO"]="BAR"
+        ENV["FAZ"]="FUZ"
+        @generator.stub!(:preserved_environment_variables).and_return(["FOO", "FAZ"])
+        @generator.preserved_environment_variables_string.should == "FOO=BAR FAZ=FUZ"
+      end
+      
+      it "adds any environment variables that are switched in the config" do
+      @config = <<-CONFIG
+cookbook_paths:
+- ./chef/cookbooks/
+recipes:
+- pivotal_workstation::ack
+env_variable_switches:
+  ME_TOO:
+    development:
+      cookbook_paths:
+      - ./chef/dev_cookbooks/
+      recipes:
+      - pivotal_dev::foo
+      CONFIG
+        @generator = ChefConfigGenerator.new(@config, "")
+        @generator.preserved_environment_variables.should =~ %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV ME_TOO}
+      end
+    end
   end
   
   describe "yaml config values" do
@@ -64,7 +95,6 @@ CONFIG
       @generator.json_hash.should == { "recipes" => ["pivotal_workstation::ack"]}
     end
   end
-      
   
   describe "environment variable merging" do
     before do
