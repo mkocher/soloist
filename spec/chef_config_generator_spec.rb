@@ -96,5 +96,44 @@ env_variable_switches:
         "pivotal_dev::foo"
         ]
     end
-  end     
+    
+    it "can deal with only having environment switched recipes/cookbooks" do
+      config = <<-CONFIG
+env_variable_switches:
+  RACK_ENV:
+    development:
+      cookbook_paths:
+      - ./chef/development_cookbooks/
+      recipes:
+      - pivotal_development::foo
+      CONFIG
+      @generator = ChefConfigGenerator.new(config, "../..")
+      @generator.cookbook_paths.should == [
+        "//../.././chef/development_cookbooks/"
+        ]
+      @generator.json_hash["recipes"].should == [
+        "pivotal_development::foo"
+        ]
+    end
+    it "can deal with only having empty recipes/cookbooks" do
+      config = <<-CONFIG
+cookbook_paths:
+recipes:
+env_variable_switches:
+  RACK_ENV:
+    development:
+      cookbook_paths:
+      - ./chef/development_cookbooks/
+      recipes:
+      - pivotal_development::foo
+      CONFIG
+      @generator = ChefConfigGenerator.new(config, "../..")
+      @generator.cookbook_paths.should == [
+        "//../.././chef/development_cookbooks/"
+        ]
+      @generator.json_hash["recipes"].should == [
+        "pivotal_development::foo"
+        ]
+    end
+  end
 end
