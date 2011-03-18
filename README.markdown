@@ -92,3 +92,7 @@ and a recipe list of
 	  "pivotal_workstation::ack", 
 	  "production::foo"
 	]
+	
+License
+=======
+Soloist is MIT Licensed.  See MIT-LICENSE for details.
