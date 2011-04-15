@@ -10,7 +10,7 @@ Soloist is a script packaged as a gem which when run recurses up the file tree l
 # That's exactly what I've always wanted! How do I use it?
 * (sudo) gem install soloist
 * create a directory to store your cookbooks in, and get a cookbook: 
-	sh -c 'mkdir -p chef/cookbooks/pivotal_workstation && cd chef/cookbooks/pivotal_workstation &&  curl -L http://github.com/mkocher/pivotal_workstation/tarball/master |  gunzip | tar xvf - --strip=1'
+	sh -c 'mkdir -p chef/cookbooks/pivotal_workstation && cd chef/cookbooks/pivotal_workstation &&  curl -L http://github.com/pivotal/pivotal_workstation/tarball/master |  gunzip | tar xvf - --strip=1'
 * create your soloistrc file in the root of your project.
 
 # What if I'm just setting up my own machine, and have many projects?
