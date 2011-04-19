@@ -10,7 +10,7 @@ Soloist is a script packaged as a gem which when run recurses up the file tree l
 # That's exactly what I've always wanted! How do I use it?
 * (sudo) gem install soloist
 * create a directory to store your cookbooks in, and get a cookbook: 
-	sh -c 'mkdir -p chef/cookbooks/pivotal_workstation && cd chef/cookbooks/pivotal_workstation &&  curl -L http://github.com/mkocher/pivotal_workstation/tarball/master |  gunzip | tar xvf - --strip=1'
+	sh -c 'mkdir -p chef/cookbooks/pivotal_workstation && cd chef/cookbooks/pivotal_workstation &&  curl -L http://github.com/pivotal/pivotal_workstation/tarball/master |  gunzip | tar xvf - --strip=1'
 * create your soloistrc file in the root of your project.
 
 # What if I'm just setting up my own machine, and have many projects?
@@ -19,9 +19,9 @@ Just put your soloistrc file in your home directory, and point it to wherever yo
 # How do I write a solistrc file?
 It's a yaml file, currently with two lists to maintain:
 
-The first, _Cookbook\_Paths_, should point (using an absolute or path relative to your soloistrc file) to the directory containing your cookbooks, such was pivotal_workstation.
+The first, _cookbook\_paths_, should point (using an absolute or path relative to your soloistrc file) to the directory containing your cookbooks, such was pivotal_workstation.
 
-The second, _Recipes_ should be a list of recipes you wish to run.
+The second, _recipes_ should be a list of recipes you wish to run.
 
 # Then What?
 $> soloist
@@ -76,19 +76,23 @@ I'm trying out adding support in the soloistrc file for selecting recipes based 
 	- pivotal_workstation::ack
 	env_variable_switches:
 	  RACK_ENV:
-	    development:
+	    production:
 	      cookbook_paths:
-	      - ./chef/dev_cookbooks/
+	      - ./chef/production_cookbooks/
 	      recipes:
-	      - pivotal_dev::foo
+	      - production::foo
 
 The values are merged in, so this results in a cookbook path of
 	[
       "./chef/cookbooks/",
-      "./chef/dev_cookbooks/"
+      "./chef/production_cookbooks/"
     ]
 and a recipe list of
 	[
 	  "pivotal_workstation::ack", 
-	  "pivotal_dev::foo"
+	  "production::foo"
 	]
+	
+License
+=======
+Soloist is MIT Licensed.  See MIT-LICENSE for details.

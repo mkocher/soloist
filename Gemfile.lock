@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    soloist (0.0.3)
+    soloist (0.0.5)
       chef (= 0.9.12)
       json (= 1.4.6)
 
