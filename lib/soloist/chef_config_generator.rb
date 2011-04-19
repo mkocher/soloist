@@ -10,12 +10,14 @@ class ChefConfigGenerator
   def merge_env_variable_switches
     return unless @hash["env_variable_switches"]
     @hash["env_variable_switches"].keys.each do |variable|
-      sub_hash = @hash["env_variable_switches"][variable][ENV[variable]]
-      if sub_hash && sub_hash["recipes"]
-        @hash["recipes"] = (@hash["recipes"] + sub_hash["recipes"]).uniq
-      end
-      if sub_hash && sub_hash["cookbook_paths"]
-        @hash["cookbook_paths"] = (@hash["cookbook_paths"] + sub_hash["cookbook_paths"]).uniq
+      ENV[variable].split(',').each do |env_variable_value|
+        sub_hash = @hash["env_variable_switches"][variable][env_variable_value]
+        if sub_hash && sub_hash["recipes"]
+          @hash["recipes"] = (@hash["recipes"] + sub_hash["recipes"]).uniq
+        end
+        if sub_hash && sub_hash["cookbook_paths"]
+          @hash["cookbook_paths"] = (@hash["cookbook_paths"] + sub_hash["cookbook_paths"]).uniq
+        end
       end
     end
   end

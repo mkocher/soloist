@@ -68,6 +68,10 @@ CONFIG
   
   describe "environment variable merging" do
     before do
+      FileUtils.stub(:pwd).and_return("/")
+    end
+
+    it "merges in if the variable is set to the the value" do
       @config = <<-CONFIG
 cookbook_paths:
 - ./chef/cookbooks/
@@ -81,10 +85,6 @@ env_variable_switches:
       recipes:
       - pivotal_dev::foo
       CONFIG
-      FileUtils.stub(:pwd).and_return("/")
-    end
-
-    it "merges in if the variable is set to the the value" do
       ENV["RACK_ENV"]="development"
       @generator = ChefConfigGenerator.new(@config, "../..")
       @generator.cookbook_paths.should == [
@@ -94,6 +94,39 @@ env_variable_switches:
       @generator.json_hash["recipes"].should == [
         "pivotal_workstation::ack", 
         "pivotal_dev::foo"
+        ]
+    end
+    
+    it "splits the value on comma and applies all matching" do
+      ENV["ROLES"]="application,database"
+      @config = <<-CONFIG
+cookbook_paths:
+- ./chef/cookbooks/
+recipes:
+- pivotal_workstation::ack
+env_variable_switches:
+  ROLES:
+    application:
+      cookbook_paths:
+      - ./chef/app_cookbooks/
+      recipes:
+      - pivotal_app::application
+    database:
+      cookbook_paths:
+      - ./chef/db_cookbooks/
+      recipes:
+      - pivotal_db::database
+      CONFIG
+      @generator = ChefConfigGenerator.new(@config, "../..")
+      @generator.cookbook_paths.should =~ [
+        "//../.././chef/cookbooks/",
+        "//../.././chef/app_cookbooks/",
+        "//../.././chef/db_cookbooks/"
+        ]
+      @generator.json_hash["recipes"].should =~ [
+        "pivotal_workstation::ack", 
+        "pivotal_app::application",
+        "pivotal_db::database",
         ]
     end
   end     
