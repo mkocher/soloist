@@ -160,6 +160,7 @@ env_variable_switches:
         ]
     end
 
+
     it "can deal with only having environment switched recipes/cookbooks" do
       config = <<-CONFIG
 env_variable_switches:
