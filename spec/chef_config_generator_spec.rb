@@ -159,6 +159,15 @@ env_variable_switches:
         "pivotal_db::database",
         ]
     end
+    
+    it "can deal with empty env switched variables, and passes them through" do
+      config = <<-CONFIG
+env_variable_switches:
+  RACK_ENV:
+      CONFIG
+      @generator = ChefConfigGenerator.new(config, "../..")
+      @generator.preserved_environment_variables.should include("RACK_ENV")
+    end
 
 
     it "can deal with only having environment switched recipes/cookbooks" do
