@@ -66,8 +66,8 @@ soloistrc
 	- pivotal_workstation::user_owns_usr_local
 	- pivotal_workstation::workspace_directory
 
-Environment Variable Switching (Alpha)
-======================================
+Environment Variable Switching
+==============================
 I'm trying out adding support in the soloistrc file for selecting recipes based on environment variables.  Cap should allow setting environment variables fairly easily on deploy, and they can be set permanently on the machine if desired.  To use these, add a env_variable_switches key to your soloistrc.  They keys of the hash should be the environment variable you wish to change the configuration based on, and the value should be a hash keyed by the value of the variable.  It's easier than it sounds - see the example below. (NB: Note that the CamelSnake is gone in the soloistrc, and while the basic config accepts the old keys, environment variable switching requires snake case keys)
 
 	cookbook_paths:
@@ -93,6 +93,10 @@ and a recipe list of
 	  "production::foo"
 	]
 	
+Log Level
+=========
+Soloist runs chef at log level info by default.  Debug is very verbose, but makes debugging chef recipes much easier.  Just set the LOG_LEVEL environment variable to 'debug' (or other valid chef log level) and it will be passed through.
+
 License
 =======
 Soloist is MIT Licensed.  See MIT-LICENSE for details.
