@@ -1,32 +1,11 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-require 'soloist'
-
-def fileify(contents)
-  file = Tempfile.new("soloist")
-  file << contents
-  file.flush
-  file
-end
-
-def walk_up_and_find_file(filenames)
-  pwd = FileUtils.pwd
-  file = nil
-  path_to_file = ""
-  while !file && FileUtils.pwd != '/'
-    file = filenames.detect { |f| Dir.glob("*").include?(f) }
-    FileUtils.cd("..")
-    path_to_file << "../" unless file
-  end
-  FileUtils.cd(pwd)
-  file_contents = File.read(path_to_file + file) if file
-  [file_contents, path_to_file]
-end
+require File.join(File.dirname(__FILE__), '..', 'lib', 'soloist')
 
 log_level = ENV['LOG_LEVEL'] || "info"
 
-soloistrc_contents, soloistrc_path = walk_up_and_find_file(["soloistrc"])
-config_generator = ChefConfigGenerator.new(soloistrc_contents, soloistrc_path)
+soloistrc_contents, soloistrc_path = Soloist::Util.walk_up_and_find_file(["soloistrc"])
+config_generator = Soloist::ChefConfigGenerator.new(soloistrc_contents, soloistrc_path)
 
 # if ARGV.length >= 1
 #   json_config = JSON.parse(File.read(json_file))
@@ -36,8 +15,8 @@ config_generator = ChefConfigGenerator.new(soloistrc_contents, soloistrc_path)
 #   File.open(json_file, "w+"){|f| f<<JSON.pretty_generate(json_config) }
 # end
 
-solo_rb = fileify(config_generator.solo_rb)
-metadata_json = fileify(config_generator.json_file)
+solo_rb = Soloist::Util.fileify(config_generator.solo_rb)
+metadata_json = Soloist::Util.fileify(config_generator.json_file)
 
 command = "sudo bash -c '#{config_generator.preserved_environment_variables_string} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
 
