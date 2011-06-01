@@ -10,6 +10,7 @@ module Soloist
     end
     
     attr_reader :preserved_environment_variables, :cookbook_paths
+    attr_accessor :recipes
     
     def support_old_format(hash)
       hash['recipes'] ||= hash.delete('Recipes')
