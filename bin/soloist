@@ -4,8 +4,15 @@ require File.join(File.dirname(__FILE__), '..', 'lib', 'soloist')
 
 log_level = ENV['LOG_LEVEL'] || "info"
 
-soloistrc_contents, soloistrc_path = Soloist::Util.walk_up_and_find_file(["soloistrc"])
-config_generator = Soloist::ChefConfigGenerator.new(soloistrc_contents, soloistrc_path)
+def with_or_without_dot(file_name)
+  [file_name, ".#{file_name}"]
+end
+
+soloistrc_contents, soloistrc_path = Soloist::Util.walk_up_and_find_file(with_or_without_dot("soloistrc"))
+config_generator = Soloist::ChefConfigGenerator.new(YAML.load(soloistrc_contents), soloistrc_path)
+
+soloistrc_contents, soloistrc_path = Soloist::Util.walk_up_and_find_file(with_or_without_dot("soloistrc_local"), :required => false)
+config_generator.merge_config(YAML.load(soloistrc_contents), soloistrc_path) if soloistrc_contents
 
 # if ARGV.length >= 1
 #   json_config = JSON.parse(File.read(json_file))

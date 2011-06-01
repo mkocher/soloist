@@ -2,36 +2,47 @@ require 'yaml'
 
 module Soloist
   class Soloist::ChefConfigGenerator
-    def initialize(yaml_string, relative_path_to_soloistrc)
-      @hash = YAML.load(yaml_string)
-      @relative_path_to_soloistrc = relative_path_to_soloistrc
-      merge_env_variable_switches
+    def initialize(config, relative_path_to_soloistrc)
+      @recipes = []
+      @cookbook_paths = []
+      @preserved_environment_variables = %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
+      merge_config(config, relative_path_to_soloistrc)
+    end
+    
+    attr_reader :preserved_environment_variables, :cookbook_paths
+    
+    def support_old_format(hash)
+      hash['recipes'] ||= hash.delete('Recipes')
+      hash['cookbook_paths'] ||= hash.delete('Cookbook_Paths')
+      hash
+    end
+    
+    def append_path(paths, relative_path_to_soloistrc)
+      paths.map do |path|
+        path.slice(0,1) == '/' ? path : "#{FileUtils.pwd}/#{relative_path_to_soloistrc}/#{path}"
+      end
     end
   
-    def merge_config(sub_hash)
+    def merge_config(sub_hash, relative_path_to_soloistrc)
+      sub_hash = support_old_format(sub_hash)
       if sub_hash["recipes"]
-        @hash["recipes"] ||= []
-        @hash["recipes"] = (@hash["recipes"] + sub_hash["recipes"]).uniq
+        @recipes = (@recipes + sub_hash["recipes"]).uniq
       end
       if sub_hash["cookbook_paths"]
-        @hash["cookbook_paths"] ||= []
-        @hash["cookbook_paths"] = (@hash["cookbook_paths"] + sub_hash["cookbook_paths"]).uniq
+        @cookbook_paths = (@cookbook_paths + append_path(sub_hash["cookbook_paths"], relative_path_to_soloistrc)).uniq
+      end
+      if sub_hash["env_variable_switches"]
+        merge_env_variable_switches(sub_hash["env_variable_switches"], relative_path_to_soloistrc)
       end
     end
   
-    def merge_env_variable_switches
-      return unless @hash["env_variable_switches"]
-      @hash["env_variable_switches"].keys.each do |variable|
+    def merge_env_variable_switches(hash_to_merge, relative_path_to_soloistrc)
+      hash_to_merge.keys.each do |variable|
+        @preserved_environment_variables << variable
         ENV[variable] && ENV[variable].split(',').each do |env_variable_value|
-          sub_hash = @hash["env_variable_switches"][variable] && @hash["env_variable_switches"][variable][env_variable_value]
-          merge_config(sub_hash) if sub_hash
+          sub_hash = hash_to_merge[variable] && hash_to_merge[variable][env_variable_value]
+          merge_config(sub_hash, relative_path_to_soloistrc) if sub_hash
         end
-      end
-    end
-  
-    def cookbook_paths
-      (@hash["cookbook_paths"] || @hash["Cookbook_Paths"]).map do |v|
-        (v =~ /\//) == 0 ? v : "#{FileUtils.pwd}/#{@relative_path_to_soloistrc}/#{v}"
       end
     end
   
@@ -40,20 +51,13 @@ module Soloist
     end
   
     def json_hash
-      recipes = @hash["Recipes"] || @hash["recipes"]
       {
-        "recipes" => recipes
+        "recipes" => @recipes
       }
     end
   
     def json_file
       json_hash.to_json
-    end
-  
-    def preserved_environment_variables
-      passed = %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
-      passed += @hash["env_variable_switches"].keys if @hash["env_variable_switches"]
-      passed
     end
   
     def preserved_environment_variables_string

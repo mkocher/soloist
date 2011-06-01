@@ -97,6 +97,10 @@ Log Level
 =========
 Soloist runs chef at log level info by default.  Debug is very verbose, but makes debugging chef recipes much easier.  Just set the LOG_LEVEL environment variable to 'debug' (or other valid chef log level) and it will be passed through.
 
+Local Overrides (experimental)
+==============================
+Soloist is an easy way to share configuration across workstations.  If you want to have configuration in chef that you don't want to share with the rest of the project, you can create a soloistrc_local file in addition to the soloistrc file.  This file will be processed after the soloistrc, and everything in it will be added to the run list.  Be careful that you are clear what goes where - if it's a dependency of the project, it should be checked into the soloistrc file in the project.
+
 License
 =======
 Soloist is MIT Licensed.  See MIT-LICENSE for details.

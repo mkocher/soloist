@@ -10,12 +10,19 @@ Cookbook_Paths:
 Recipes:
 - pivotal_workstation::ack
 CONFIG
-      @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
+      @config = YAML.load(@config)
       FileUtils.stub(:pwd).and_return("/current/working/directory")
+      @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
     end
 
     it "appends the current path and relative path to the cookbooks directory" do
       @generator.cookbook_paths.should == ["/current/working/directory/../.././chef/cookbooks/"]
+    end
+
+    it "does not append if an absolute path is given" do
+      @config['cookbook_paths'] = ["/foo/bar"]
+      @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
+      @generator.cookbook_paths.should == ["/foo/bar"]
     end
   
     it "can generate a solo.rb contents" do
@@ -60,7 +67,7 @@ env_variable_switches:
       recipes:
       - pivotal_dev::foo
       CONFIG
-        @generator = Soloist::ChefConfigGenerator.new(@config, "")
+        @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "")
         @generator.preserved_environment_variables.should =~ %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV ME_TOO}
       end
     end
@@ -73,25 +80,25 @@ env_variable_switches:
       
     it "accepts Cookbook_Paths, because the CamelSnake is a typo that must be supported" do
       @config = "Cookbook_Paths:\n- ./chef/cookbooks/\n"
-      @generator = Soloist::ChefConfigGenerator.new(@config, "")
-      @generator.cookbook_paths.should == ["///./chef/cookbooks/"]
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "..")
+      @generator.cookbook_paths.should == ["//.././chef/cookbooks/"]
     end
     
     it "accepts cookbook_paths, because it is sane" do
       @config = "cookbook_paths:\n- ./chef/cookbooks/\n"
-      @generator = Soloist::ChefConfigGenerator.new(@config, "")
-      @generator.cookbook_paths.should == ["///./chef/cookbooks/"]
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "..")
+      @generator.cookbook_paths.should == ["//.././chef/cookbooks/"]
     end
     
     it "accepts Recipes, because that's the way it was" do
       @config = "Recipes:\n- pivotal_workstation::ack"
-      @generator = Soloist::ChefConfigGenerator.new(@config, "")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "")
       @generator.json_hash.should == { "recipes" => ["pivotal_workstation::ack"]}
     end
 
     it "accepts recipes, because it's snake now" do
       @config = "recipes:\n- pivotal_workstation::ack"
-      @generator = Soloist::ChefConfigGenerator.new(@config, "")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "")
       @generator.json_hash.should == { "recipes" => ["pivotal_workstation::ack"]}
     end
   end
@@ -116,7 +123,7 @@ env_variable_switches:
       - pivotal_dev::foo
       CONFIG
       ENV["RACK_ENV"]="development"
-      @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "../..")
       @generator.cookbook_paths.should == [
         "//../.././chef/cookbooks/",
         "//../.././chef/dev_cookbooks/"
@@ -147,7 +154,7 @@ env_variable_switches:
       recipes:
       - pivotal_db::database
       CONFIG
-      @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "../..")
       @generator.cookbook_paths.should =~ [
         "//../.././chef/cookbooks/",
         "//../.././chef/app_cookbooks/",
@@ -165,7 +172,7 @@ env_variable_switches:
 env_variable_switches:
   RACK_ENV:
       CONFIG
-      @generator = Soloist::ChefConfigGenerator.new(config, "../..")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(config), "../..")
       @generator.preserved_environment_variables.should include("RACK_ENV")
     end
 
@@ -180,7 +187,7 @@ env_variable_switches:
       recipes:
       - pivotal_development::foo
       CONFIG
-      @generator = Soloist::ChefConfigGenerator.new(config, "../..")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(config), "../..")
       @generator.cookbook_paths.should == [
         "//../.././chef/development_cookbooks/"
         ]
@@ -200,7 +207,7 @@ env_variable_switches:
       recipes:
       - pivotal_development::foo
       CONFIG
-      @generator = Soloist::ChefConfigGenerator.new(config, "../..")
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(config), "../..")
       @generator.cookbook_paths.should == [
         "//../.././chef/development_cookbooks/"
         ]

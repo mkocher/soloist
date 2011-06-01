@@ -7,19 +7,24 @@ module Soloist
       file
     end
     
-    def self.walk_up_and_find_file(filenames)
+    def self.walk_up_and_find_file(filenames, opts={})
       pwd = FileUtils.pwd
       file = nil
       path_to_file = ""
       while !file && FileUtils.pwd != '/'
-        file = filenames.detect { |f| Dir.glob("*").include?(f) }
+        file = filenames.detect { |f| File.exists?(f) }
         FileUtils.cd("..")
         path_to_file << "../" unless file
       end
       FileUtils.cd(pwd)
-      raise Errno::ENOENT, "#{filenames} not found" unless file
-      file_contents = File.read(path_to_file + file)# if file
-      [file_contents, path_to_file]
+      if file
+        file_contents = File.read(path_to_file + file) if file
+        [file_contents, path_to_file]
+      elsif opts[:required] == false
+        [nil, nil]
+      else
+        raise Errno::ENOENT, "#{filenames.join(" or ")} not found" unless file || opts[:required] == false
+      end
     end
   end
 end

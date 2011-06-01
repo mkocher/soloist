@@ -8,5 +8,9 @@ describe Soloist::Util do
         Soloist::Util.walk_up_and_find_file("file_not_on_the_filesystem")
       end.should raise_error(Errno::ENOENT, "No such file or directory - file_not_on_the_filesystem not found")
     end
+    
+    it "doesn't raise an error if :required => false is passed" do
+      Soloist::Util.walk_up_and_find_file("file_not_on_the_filesystem", :required => false).should == [nil, nil]
+    end
   end
 end
