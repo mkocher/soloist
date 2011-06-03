@@ -1,13 +1,17 @@
 module Soloist
-  class Util
-    def self.fileify(contents)
+  module Util
+    def with_or_without_dot(file_name)
+      [file_name, ".#{file_name}"]
+    end
+    
+    def fileify(contents)
       file = Tempfile.new("soloist")
       file << contents
       file.flush
       file
     end
     
-    def self.walk_up_and_find_file(filenames, opts={})
+    def walk_up_and_find_file(filenames, opts={})
       pwd = FileUtils.pwd
       file = nil
       path_to_file = ""

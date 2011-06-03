@@ -1,17 +1,14 @@
 #!/usr/bin/env ruby
-require 'rubygems'
 require File.join(File.dirname(__FILE__), '..', 'lib', 'soloist')
+
+include Soloist::Util
 
 log_level = ENV['LOG_LEVEL'] || "info"
 
-def with_or_without_dot(file_name)
-  [file_name, ".#{file_name}"]
-end
-
-soloistrc_contents, soloistrc_path = Soloist::Util.walk_up_and_find_file(with_or_without_dot("soloistrc"))
+soloistrc_contents, soloistrc_path = walk_up_and_find_file(with_or_without_dot("soloistrc"))
 config_generator = Soloist::ChefConfigGenerator.new(YAML.load(soloistrc_contents), soloistrc_path)
 
-soloistrc_contents, soloistrc_path = Soloist::Util.walk_up_and_find_file(with_or_without_dot("soloistrc_local"), :required => false)
+soloistrc_contents, soloistrc_path = walk_up_and_find_file(with_or_without_dot("soloistrc_local"), :required => false)
 config_generator.merge_config(YAML.load(soloistrc_contents), soloistrc_path) if soloistrc_contents
 
 if ARGV.length >= 1
@@ -20,8 +17,8 @@ if ARGV.length >= 1
   config_generator.recipes = [requested_recipe]
 end
 
-solo_rb = Soloist::Util.fileify(config_generator.solo_rb)
-metadata_json = Soloist::Util.fileify(config_generator.json_file)
+solo_rb = fileify(config_generator.solo_rb)
+metadata_json = fileify(config_generator.json_file)
 
 command = "sudo bash -c '#{config_generator.preserved_environment_variables_string} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
 

@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matthew Kocher"]
   s.email       = ["kocher@gmail.com"]
-  s.homepage    = "http://rubygems.org/gems/soloist"
+  s.homepage    = "http://github.com/mkocher/soloist"
   s.summary     = %q{Soloist is a simple way of running chef-solo}
   s.description = %q{Soloist is an easy way of running chef solo, but it's not doing much.}
 
