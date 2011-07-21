@@ -19,6 +19,6 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency('chef')
-  s.add_dependency('json')
+  s.add_dependency "chef"
+  s.add_dependency "json", ">= 1.4.4", "<= 1.5.2"
 end
