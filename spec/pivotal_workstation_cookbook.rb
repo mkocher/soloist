@@ -1,0 +1,1 @@
+# this file is loaded by the tests instead of the actual pivotal_workstation_cookbook

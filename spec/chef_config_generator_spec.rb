@@ -31,7 +31,6 @@ CONFIG
       module ::PivotalWorkstationCookbook
         COOKBOOK_PATH = "/var/lib/ruby/gems/pivotal_workstation/cookbooks/"
       end
-      Kernel.stub!(:require).with("pivotal_workstation_cookbook").and_return(true)
       @generator.solo_rb.should == 'cookbook_path ["/current/working/directory/../.././chef/cookbooks/", "/var/lib/ruby/gems/pivotal_workstation/cookbooks/"]'
     end
   

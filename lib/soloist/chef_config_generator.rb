@@ -56,7 +56,7 @@ module Soloist
     def solo_rb
       all_cookbook_paths = cookbook_paths
       cookbook_gems.each do |gem_cookbook|
-        Kernel.require gem_cookbook
+        require gem_cookbook
         all_cookbook_paths << Kernel.const_get(camelize(gem_cookbook)).const_get('COOKBOOK_PATH')
       end
       "cookbook_path #{all_cookbook_paths.inspect}"
