@@ -2,14 +2,17 @@ require 'yaml'
 
 module Soloist
   class Soloist::ChefConfigGenerator
+    include Soloist::Util
+    
     def initialize(config, relative_path_to_soloistrc)
       @recipes = []
       @cookbook_paths = []
+      @cookbook_gems = []
       @preserved_environment_variables = %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
       merge_config(config, relative_path_to_soloistrc)
     end
     
-    attr_reader :preserved_environment_variables, :cookbook_paths
+    attr_reader :preserved_environment_variables, :cookbook_paths, :cookbook_gems
     attr_accessor :recipes
     
     def support_old_format(hash)
@@ -32,6 +35,9 @@ module Soloist
       if sub_hash["cookbook_paths"]
         @cookbook_paths = (@cookbook_paths + append_path(sub_hash["cookbook_paths"], relative_path_to_soloistrc)).uniq
       end
+      if sub_hash["cookbook_gems"]
+        (@cookbook_gems += sub_hash["cookbook_gems"]).uniq!
+      end
       if sub_hash["env_variable_switches"]
         merge_env_variable_switches(sub_hash["env_variable_switches"], relative_path_to_soloistrc)
       end
@@ -48,7 +54,12 @@ module Soloist
     end
   
     def solo_rb
-      "cookbook_path #{cookbook_paths.inspect}"
+      all_cookbook_paths = cookbook_paths
+      cookbook_gems.each do |gem_cookbook|
+        Kernel.require gem_cookbook
+        all_cookbook_paths << Kernel.const_get(camelize(gem_cookbook)).const_get('COOKBOOK_PATH')
+      end
+      "cookbook_path #{all_cookbook_paths.inspect}"
     end
   
     def json_hash

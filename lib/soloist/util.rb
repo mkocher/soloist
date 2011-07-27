@@ -30,5 +30,12 @@ module Soloist
         raise Errno::ENOENT, "#{filenames.join(" or ")} not found" unless file || opts[:required] == false
       end
     end
+
+    # stolen from activesupport
+    def camelize(term)
+      string = term.to_s
+      string = string.sub(/^[a-z\d]*/) { $&.capitalize }
+      string.gsub(/(?:_|(\/))([a-z\d]*)/i) { "#{$1}#{$2.capitalize}" }.gsub('/', '::')
+    end
   end
 end

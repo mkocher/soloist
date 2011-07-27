@@ -7,6 +7,8 @@ describe Soloist::ChefConfigGenerator do
       @config = <<-CONFIG
 Cookbook_Paths:
 - ./chef/cookbooks/
+cookbook_gems:
+- pivotal_workstation_cookbook
 Recipes:
 - pivotal_workstation::ack
 CONFIG
@@ -26,7 +28,11 @@ CONFIG
     end
   
     it "can generate a solo.rb contents" do
-      @generator.solo_rb.should == 'cookbook_path ["/current/working/directory/../.././chef/cookbooks/"]'
+      module ::PivotalWorkstationCookbook
+        COOKBOOK_PATH = "/var/lib/ruby/gems/pivotal_workstation/cookbooks/"
+      end
+      Kernel.stub!(:require).with("pivotal_workstation_cookbook").and_return(true)
+      @generator.solo_rb.should == 'cookbook_path ["/current/working/directory/../.././chef/cookbooks/", "/var/lib/ruby/gems/pivotal_workstation/cookbooks/"]'
     end
   
     it "can generate the json contents" do
@@ -131,6 +137,24 @@ env_variable_switches:
       @generator.json_hash["recipes"].should == [
         "pivotal_workstation::ack", 
         "pivotal_dev::foo"
+        ]
+    end
+    
+    it "merges cookbook_gems" do
+      @config = <<-CONFIG
+      cookbook_gems:
+      - pivotal_shared
+      env_variable_switches:
+        RACK_ENV:
+          development:
+            cookbook_gems:
+            - pivotal_shared
+            - pivotal_workstation
+            CONFIG
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "../..")
+      @generator.cookbook_gems.should =~ [
+        "pivotal_shared",
+        "pivotal_workstation"
         ]
     end
     
