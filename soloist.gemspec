@@ -3,12 +3,12 @@ $:.push File.expand_path("../lib", __FILE__)
 require "soloist/version"
 
 Gem::Specification.new do |s|
-  s.name        = "soloist"
+  s.name        = "ahamid-soloist"
   s.version     = Soloist::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matthew Kocher"]
   s.email       = ["kocher@gmail.com"]
-  s.homepage    = "http://github.com/mkocher/soloist"
+  s.homepage    = "http://github.com/ahamid/soloist"
   s.summary     = %q{Soloist is a simple way of running chef-solo}
   s.description = %q{Soloist is an easy way of running chef solo, but it's not doing much.}
 
