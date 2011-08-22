@@ -16,7 +16,7 @@ Soloist is a script packaged as a gem which when run recurses up the file tree l
 # What if I'm just setting up my own machine, and have many projects?
 Just put your soloistrc file in your home directory, and point it to wherever you want to keep your cookbooks. Or just dedicate a git repo to it, and go into that directory before running soloist.
 
-# How do I write a solistrc file?
+# How do I write a soloistrc file?
 It's a yaml file, currently with two lists to maintain:
 
 The first, _cookbook\_paths_, should point (using an absolute or path relative to your soloistrc file) to the directory containing your cookbooks, such was pivotal_workstation.
