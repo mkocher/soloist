@@ -49,6 +49,7 @@ GEM
       systemu
       yajl-ruby
     polyglot (0.3.2)
+    rake (0.8.7)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rspec (2.4.0)
@@ -70,5 +71,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  rake
   rspec (= 2.4.0)
   soloist!
