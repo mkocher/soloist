@@ -20,5 +20,4 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "chef"
-  s.add_dependency "json", ">= 1.4.4", "<= 1.5.2"
 end
