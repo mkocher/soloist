@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require File.join(File.dirname(__FILE__), '..', 'lib', 'soloist')
+require 'etc'
 
 include Soloist::Util
 
@@ -20,7 +21,11 @@ end
 solo_rb = fileify(config_generator.solo_rb)
 metadata_json = fileify(config_generator.json_file)
 
-command = "sudo bash -c '#{config_generator.preserved_environment_variables_string} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
+command = "bash -c '#{config_generator.preserved_environment_variables_string} chef-solo -j #{metadata_json.path} -c #{solo_rb.path} -l #{log_level}'"
+
+if Etc.getlogin != "root"
+  command = 'sudo ' + command
+end
 
 puts "running chef: " + command
 system(command) || exit(1)
