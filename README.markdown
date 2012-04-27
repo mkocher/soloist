@@ -101,6 +101,23 @@ Local Overrides (experimental)
 ==============================
 Soloist is an easy way to share configuration across workstations.  If you want to have configuration in chef that you don't want to share with the rest of the project, you can create a soloistrc_local file in addition to the soloistrc file.  This file will be processed after the soloistrc, and everything in it will be added to the run list.  Be careful that you are clear what goes where - if it's a dependency of the project, it should be checked into the soloistrc file in the project.
 
+Setting Node Attributes
+=======================
+You can set node attributes in your soloistrc file that will be included in the JSON attributes file passed to chef-solo.
+
+    cookbook_paths:
+    - ./chef/cookbooks/
+    recipes:
+    - pivotal_workstation::github_ssh_keys
+    - pivotal_workstation::rvm
+    node:
+      github_username: john.smith
+      github_password: pas$w0rd
+      rvm:
+        rubies:
+          ruby-1.8.7-p299: {}
+          jruby-1.6.6: {}
+
 License
 =======
 Soloist is MIT Licensed.  See MIT-LICENSE for details.

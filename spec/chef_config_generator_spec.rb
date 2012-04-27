@@ -106,6 +106,12 @@ env_variable_switches:
       @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "")
       @generator.json_hash.should == { "recipes" => ["pivotal_workstation::ack"]}
     end
+    
+    it "should set node attributes" do
+      @config = "node:\n  github_username: avh4"
+      @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "")
+      @generator.json_hash.should == { "recipes" => [], "github_username" => "avh4" }
+    end
   end
   
   describe "environment variable merging" do
