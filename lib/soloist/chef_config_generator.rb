@@ -9,6 +9,7 @@ module Soloist
       @cookbook_paths = []
       @cookbook_gems = []
       @preserved_environment_variables = %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
+      @node_attributes = config['node'] || {}
       merge_config(config, relative_path_to_soloistrc)
     end
     
@@ -65,7 +66,7 @@ module Soloist
     def json_hash
       {
         "recipes" => @recipes
-      }
+      }.merge(@node_attributes)
     end
   
     def json_file
