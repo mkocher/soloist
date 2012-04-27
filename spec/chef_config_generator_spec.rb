@@ -108,7 +108,7 @@ env_variable_switches:
     end
     
     it "should set node attributes" do
-      @config = "node:\n  github_username: avh4"
+      @config = "node_attributes:\n  github_username: avh4"
       @generator = Soloist::ChefConfigGenerator.new(YAML.load(@config), "")
       @generator.json_hash.should == { "recipes" => [], "github_username" => "avh4" }
     end

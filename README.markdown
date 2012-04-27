@@ -110,7 +110,7 @@ You can set node attributes in your soloistrc file that will be included in the 
     recipes:
     - pivotal_workstation::github_ssh_keys
     - pivotal_workstation::rvm
-    node:
+    node_attributes:
       github_username: john.smith
       github_password: pas$w0rd
       rvm:

@@ -9,7 +9,7 @@ module Soloist
       @cookbook_paths = []
       @cookbook_gems = []
       @preserved_environment_variables = %w{PATH BUNDLE_PATH GEM_HOME GEM_PATH RAILS_ENV RACK_ENV}
-      @node_attributes = config['node'] || {}
+      @node_attributes = config['node_attributes'] || {}
       merge_config(config, relative_path_to_soloistrc)
     end
     
