@@ -5,5 +5,5 @@ rvm:
   - rbx-19mode
   - rbx-18mode
   - jruby
-  - ruby-head
+#  - ruby-head
   - ree
