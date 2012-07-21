@@ -13,7 +13,6 @@ config_generator.merge_config(YAML.load(soloistrc_contents), soloistrc_path) if 
 
 if ARGV.length >= 1
   requested_recipe = ARGV[0]
-  raise "requested recipe '#{requested_recipe}' not in soloistrc or soloistrc_local" unless config_generator.recipes.include?(requested_recipe)
   config_generator.recipes = [requested_recipe]
 end
 
