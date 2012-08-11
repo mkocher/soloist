@@ -1,5 +1,4 @@
-require 'rspec'
-require File.dirname(__FILE__) + '/../lib/soloist'
+require 'spec_helper'
 
 describe Soloist::Util do
   class TestClass

@@ -1,5 +1,4 @@
-require 'rspec'
-require File.dirname(__FILE__) + '/../lib/soloist'
+require 'spec_helper'
 
 describe Soloist::ChefConfigGenerator do
   describe "generation" do
@@ -15,6 +14,7 @@ CONFIG
       @config = YAML.load(@config)
       FileUtils.stub(:pwd).and_return("/current/working/directory")
       @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
+      mock_gem("pivotal_workstation_cookbook")
     end
 
     it "appends the current path and relative path to the cookbooks directory" do
@@ -26,20 +26,24 @@ CONFIG
       @generator = Soloist::ChefConfigGenerator.new(@config, "../..")
       @generator.cookbook_paths.should == ["/foo/bar"]
     end
-  
-    it "can generate a solo.rb contents" do
-      module ::PivotalWorkstationCookbook
-        COOKBOOK_PATH = "/var/lib/ruby/gems/pivotal_workstation/cookbooks/"
+
+    describe ".solo_rb" do
+      it "can generate a solo.rb contents" do
+        @generator.solo_rb.should =~ %r{cookbook_path \["/current/working/directory/../.././chef/cookbooks/"}
       end
-      @generator.solo_rb.should == 'cookbook_path ["/current/working/directory/../.././chef/cookbooks/", "/var/lib/ruby/gems/pivotal_workstation/cookbooks/"]'
+
+      it "should include a tempdir with pivotal_workstation in it" do
+        @generator.solo_rb.match(%r{cookbook_path \[".*", "(.*)"\]})
+        File.exist?("#{$1}/pivotal_workstation").should be
+      end
     end
-  
+
     it "can generate the json contents" do
       @generator.json_hash.should == {
         "recipes" => ['pivotal_workstation::ack']
       }
     end
-  
+
     it "can generate json files" do
       JSON.parse(@generator.json_file).should == {
         "recipes" => ['pivotal_workstation::ack']

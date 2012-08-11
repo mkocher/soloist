@@ -6,6 +6,7 @@ module Soloist
     
     def fileify(contents)
       file = Tempfile.new("soloist")
+      puts "==== Temp File Contents ====\n#{contents}" if ENV['LOG_LEVEL'] == 'debug'
       file << contents
       file.flush
       file

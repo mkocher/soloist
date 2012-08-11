@@ -33,42 +33,39 @@ Example soloistrc Files
 directory layout:
 
     /Users/mkocher/workspace/project/soloistrc <-Config File
-    /Users/mkocher/workspace/project/chef/
-    /Users/mkocher/workspace/project/chef/cookbooks/pivotal_workstation/
+    /Users/mkocher/workspace/project/cookbooks/pivotal_workstation/
 
 
 soloistrc
 ---------
 	cookbook_paths:
-	- ./chef/cookbooks/
+	- ./cookbooks/
 	recipes:
 	- pivotal_workstation::ack
 	- pivotal_workstation::bash_path_order
-	- pivotal_workstation::bash_profile
 	- pivotal_workstation::bash_profile-better_history
 	- pivotal_workstation::defaults_fast_key_repeat_rate
-	- pivotal_workstation::dock_preferences
-	- pivotal_workstation::ec2_api_tools
 	- pivotal_workstation::finder_display_full_path
-	- pivotal_workstation::git
 	- pivotal_workstation::git_config_global_defaults
 	- pivotal_workstation::git_scripts
 	- pivotal_workstation::google_chrome
 	- pivotal_workstation::inputrc
-	- pivotal_workstation::mysql
-	- pivotal_workstation::osx_turn_on_locate
 	- pivotal_workstation::rvm
-	- pivotal_workstation::safari_preferences
-	- pivotal_workstation::set_multitouch_preferences
-	- pivotal_workstation::text_mate
-	- pivotal_workstation::textmate_set_defaults
 	- pivotal_workstation::turn_on_ssh
-	- pivotal_workstation::user_owns_usr_local
-	- pivotal_workstation::workspace_directory
+
+Packaging Gems as Cookbooks (alpha)
+===========================
+
+If you're a ruby developer, you're probably very comfortable wrangling gems.  Bundler makes it easy to lock your dependencies and keep them in sync in all your environments.  Soloist adds the ability to load cookbooks out of these gems.  This means you can install the  pivotal_workstation_cookbook gem, and add it to your soloistrc like so:
+
+	cookbook_gems:
+	- pivotal_workstation_cookbook
+
+Easy cookbook dependency tracking, no more git cloning, no more chef recipes that aren't yours checked into your project and easy forking with bundler and github.
 
 Environment Variable Switching
 ==============================
-I'm trying out adding support in the soloistrc file for selecting recipes based on environment variables.  Cap should allow setting environment variables fairly easily on deploy, and they can be set permanently on the machine if desired.  To use these, add a env_variable_switches key to your soloistrc.  They keys of the hash should be the environment variable you wish to change the configuration based on, and the value should be a hash keyed by the value of the variable.  It's easier than it sounds - see the example below. (NB: Note that the CamelSnake is gone in the soloistrc, and while the basic config accepts the old keys, environment variable switching requires snake case keys)
+The soloistrc file allows for selecting all options based on environment variables.  Cap should allow setting environment variables fairly easily on deploy, and they can be set permanently on the machine if desired.  To use these, add a env_variable_switches key to your soloistrc.  They keys of the hash should be the environment variable you wish to change the configuration based on, and the value should be a hash keyed by the value of the variable.  It's easier than it sounds - see the example below.
 
 	cookbook_paths:
 	- ./chef/cookbooks/
@@ -97,7 +94,7 @@ Log Level
 =========
 Soloist runs chef at log level info by default.  Debug is very verbose, but makes debugging chef recipes much easier.  Just set the LOG_LEVEL environment variable to 'debug' (or other valid chef log level) and it will be passed through.
 
-Local Overrides (experimental)
+Local Overrides
 ==============================
 Soloist is an easy way to share configuration across workstations.  If you want to have configuration in chef that you don't want to share with the rest of the project, you can create a soloistrc_local file in addition to the soloistrc file.  This file will be processed after the soloistrc, and everything in it will be added to the run list.  Be careful that you are clear what goes where - if it's a dependency of the project, it should be checked into the soloistrc file in the project.
 

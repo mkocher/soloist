@@ -55,14 +55,11 @@ module Soloist
     end
   
     def solo_rb
-      all_cookbook_paths = cookbook_paths
-      cookbook_gems.each do |gem_cookbook|
-        require gem_cookbook
-        all_cookbook_paths << Kernel.const_get(camelize(gem_cookbook)).const_get('COOKBOOK_PATH')
-      end
-      "cookbook_path #{all_cookbook_paths.inspect}"
+      linker = CookbookGemLinker.new(cookbook_gems)
+      linker.link_gem_cookbooks
+      "cookbook_path #{(cookbook_paths+[linker.cookbook_gem_temp_dir]).inspect}"
     end
-  
+
     def json_hash
       {
         "recipes" => @recipes
