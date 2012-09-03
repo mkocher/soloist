@@ -34,12 +34,20 @@ class CookbookGemLinker
 
   private
 
+  def dependencies_of(gem_name)
+    if Gem::Specification.respond_to?(:find_by_name)
+      Gem::Specification.find_by_name(gem_name)
+    else
+      Gem.searcher.find(gem_name)
+    end.dependencies.map(&:name)
+  end
+
   def calculate_gems_and_dependencies(gems=@gems)
     gems.each do |gem_cookbook|
       @gems_and_dependencies.add(gem_cookbook)
-      Gem::Specification.find_by_name(gem_cookbook).dependencies.map(&:name).each do |depdency|
-        @gems_and_dependencies.add(depdency)
-        calculate_gems_and_dependencies([depdency])
+      dependencies_of(gem_cookbook).each do |dependency|
+        @gems_and_dependencies.add(dependency)
+        calculate_gems_and_dependencies([dependency])
       end
     end
   end

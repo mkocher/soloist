@@ -44,6 +44,14 @@ describe CookbookGemLinker do
 
       linker.gems_and_dependencies.to_a.should == ["pivotal_workstation_cookbook", 'osx_dmg_cookbook', 'osx_installer_thing']
     end
+
+    it "works on old rubygems" do
+      Gem::Specification.stub('respond_to?').with(:find_by_name).and_return(false)
+      Gem::Specification.should_receive(:find_by_name).exactly(0).times
+      mock_gem("pivotal_workstation_cookbook")
+
+      linker.gems_and_dependencies.to_a.should == ["pivotal_workstation_cookbook"]
+    end
   end
 
   describe ".link_gem_cookbooks" do
