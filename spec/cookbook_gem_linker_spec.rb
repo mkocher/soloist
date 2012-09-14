@@ -42,7 +42,7 @@ describe CookbookGemLinker do
       mock_gem("osx_dmg_cookbook", ["osx_installer_thing"])
       mock_gem("osx_installer_thing")
 
-      linker.gems_and_dependencies.to_a.should == ["pivotal_workstation_cookbook", 'osx_dmg_cookbook', 'osx_installer_thing']
+      linker.gems_and_dependencies.to_a.should =~ ["pivotal_workstation_cookbook", 'osx_dmg_cookbook', 'osx_installer_thing']
     end
 
     it "works on old rubygems" do

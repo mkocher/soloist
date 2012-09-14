@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/mkocher/soloist.png)](http://travis-ci.org/mkocher/soloist)
+
 Soloist: Making chef-solo easier
 ================================
 
