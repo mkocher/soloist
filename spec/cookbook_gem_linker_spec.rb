@@ -34,7 +34,7 @@ describe CookbookGemLinker do
       mock_gem("pivotal_workstation_cookbook", ['osx_dmg_cookbook'])
       mock_gem("osx_dmg_cookbook")
 
-      linker.gems_and_dependencies.to_a.should == ["pivotal_workstation_cookbook", 'osx_dmg_cookbook']
+      linker.gems_and_dependencies.to_a.should =~ ["pivotal_workstation_cookbook", 'osx_dmg_cookbook']
     end
 
     it "gets dependencies for dependencies" do
