@@ -1,6 +1,8 @@
 require "spec_helper"
 
 describe Soloist::RoyalCrown do
+  let(:royal_crown) { Soloist::RoyalCrown.new }
+
   context "with a file" do
     let(:contents) { { "recipes" => ["broken_vim"] } }
     let(:tempfile) do
@@ -24,33 +26,20 @@ describe Soloist::RoyalCrown do
 
     describe "#save" do
       it "writes the values to a file" do
-        royal_crown.recipes << "tissue_paper"
+        royal_crown.recipes = ["hot_rats", "tissue_paper"]
         royal_crown.save
         royal_crown = Soloist::RoyalCrown.from_file(tempfile.path)
-        royal_crown.recipes.should =~ ["broken_vim", "tissue_paper"]
+        royal_crown.recipes.should =~ ["hot_rats", "tissue_paper"]
       end
     end
 
-    describe "#to_hash" do
+    describe "#to_yaml" do
       it "skips the path attribute" do
-        royal_crown.to_hash.keys.should_not include "path"
+        royal_crown.to_yaml.keys.should_not include "path"
       end
-    end
-  end
 
-  context "without a file" do
-    let(:royal_crown) { Soloist::RoyalCrown.new }
-
-    describe "#env_variable_switches" do
-      it "allows additions" do
-        royal_crown.env_variable_switches["meat"] = "beans"
-        royal_crown.env_variable_switches["meat"].should == "beans"
-      end
-    end
-
-    describe "#to_hash" do
-      it "nils out fields that have not been set" do 
-        royal_crown.to_hash["recipes"].should be_nil
+      it "nils out fields that have not been set" do
+        royal_crown.to_yaml["node_attributes"].should be_nil
       end
     end
   end

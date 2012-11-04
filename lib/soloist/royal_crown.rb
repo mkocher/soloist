@@ -1,32 +1,53 @@
 require "hashie"
 
 module Soloist
-  class RoyalCrown < Hashie::Dash
+  class RoyalCrown < Hashie::Trash
     property :path
-    property :cookbook_paths, :default => []
     property :recipes, :default => []
-    property :node_attributes, :default => {}
-    property :env_variable_switches, :default => {}
+    property :cookbook_paths, :default => []
+    property :node_attributes, :default => Hashie::Mash.new,
+             :transform_with => lambda { |v| Hashie::Mash.new(v) }
+    property :env_variable_switches, :default => Hashie::Mash.new,
+             :transform_with => lambda { |v| Hashie::Mash.new(v) }
 
-    EMPTY_INSTEAD_OF_NIL = ["cookbook_paths", "recipes", "node_attributes", "env_variable_switches"]
-
-    def self.from_file(file_path)
-      yaml = YAML.load_file(file_path).tap do |hash|
-        EMPTY_INSTEAD_OF_NIL.each { |key| hash.delete(key) if hash[key].nil? }
-      end
-
-      new(yaml.merge("path" => file_path))
+    def node_attributes=(hash)
+      self["node_attributes"] = Hashie::Mash.new(hash)
     end
 
-    def to_hash
-      super.tap do |hash|
+    def env_variable_switches=(hash)
+      self["env_variable_switches"] = Hashie::Mash.new(hash)
+    end
+
+    def to_yaml
+      to_hash.tap do |hash|
         hash.delete("path")
-        EMPTY_INSTEAD_OF_NIL.each { |key| hash[key] = nil if hash[key].empty? }
+        self.class.nilable_properties.each { |k| hash[k] = nil if hash[k].empty? }
       end
     end
 
     def save
-      File.open(path, "w") { |f| f.write(YAML.dump(to_hash)) }
+      return self unless path
+      File.open(path, "w+") { |file| file.write(YAML.dump(to_yaml)) }
+      self
+    end
+
+    def reload
+      self.class.from_file(path)
+    end
+
+    def self.from_file(file_path)
+      new(read_config(file_path).merge("path" => file_path))
+    end
+
+    def self.read_config(yaml_file)
+      YAML.load_file(yaml_file).tap do |hash|
+        nilable_properties.each { |key| hash.delete(key) if hash[key].nil? }
+      end
+    end
+
+    private
+    def self.nilable_properties
+      (properties - [:path]).map(&:to_s)
     end
   end
 end

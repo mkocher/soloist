@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = ["kocher@gmail.com", "ritezel@gmail.com"]
   s.homepage    = "http://github.com/mkocher/soloist"
   s.summary     = "Soloist is a simple way of running chef-solo"
-  s.description = "Make chef-solo easier."
+  s.description = "Makes running chef-solo easy."
 
   s.rubyforge_project = "soloist"
 

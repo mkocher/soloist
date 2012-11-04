@@ -1,5 +1,4 @@
+require "soloist/version"
 require "soloist/royal_crown"
 require "soloist/config"
-require "soloist/util"
-require "soloist/chef_config_generator"
-require "soloist/cookbook_gem_linker"
+require "soloist/cli"

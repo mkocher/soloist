@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    soloist (1.0.0)
+    soloist (1.0.0.pre)
       chef
       hashie
       librarian
