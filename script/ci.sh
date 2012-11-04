@@ -1,3 +1,3 @@
-#!/usr/bin/env ruby
+#!/bin/bash
 
-rspec
+bundle exec rspec
