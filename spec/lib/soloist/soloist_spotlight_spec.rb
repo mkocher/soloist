@@ -3,14 +3,14 @@ require "spec_helper"
 describe Soloist::Spotlight do
   let(:spotlight) { Soloist::Spotlight.new(shallow_path) }
   let(:tempdir) { Dir.mktmpdir }
-  let(:shallow_path) { File.expand_path("beans/roger", "/private#{tempdir}") }
+  let(:shallow_path) { File.expand_path("beans/roger", tempdir) }
   let(:file_path) { File.expand_path("soloistrc", shallow_path) }
 
   before { FileUtils.mkdir_p(shallow_path) }
 
   describe "#parents" do
     it "returns a list of search paths" do
-      spotlight.parents.should include "/private#{Dir.tmpdir}"
+      spotlight.parents.should include Dir.tmpdir
     end
   end
 

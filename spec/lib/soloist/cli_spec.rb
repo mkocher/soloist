@@ -23,10 +23,24 @@ describe Soloist::CLI do
         end
       end
 
-      it "invokes chef" do
-        cli.should_receive(:exec)
-        Dir.chdir(base_path) do
-          cli.run_chef
+      context "when the Cheffile does not exist" do
+        it "complains about not finding the Cheffile" do
+          Dir.chdir(base_path) do
+            expect { cli.run_chef }.to raise_error(Errno::ENOENT)
+          end
+        end
+      end
+
+      context "when the Cheffile exists" do
+        before do
+          FileUtils.touch(File.expand_path("Cheffile", base_path))
+        end
+
+        it "runs chef" do
+          cli.should_receive(:exec)
+          Dir.chdir(base_path) do
+            cli.run_chef
+          end
         end
       end
     end
