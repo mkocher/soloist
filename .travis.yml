@@ -7,3 +7,4 @@ rvm:
   - jruby
 #  - ruby-head
   - ree
+script: script/ci.sh
