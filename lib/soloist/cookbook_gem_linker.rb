@@ -1,3 +1,5 @@
+require "rubygems"
+
 class CookbookGemLinker
   include Soloist::Util
   attr_reader :gems_and_dependencies

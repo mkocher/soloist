@@ -1,5 +1,8 @@
-require 'rspec'
-require File.dirname(__FILE__) + '/../lib/soloist'
+$: << File.expand_path("../../lib", __FILE__)
+
+require "soloist"
+require "tempfile"
+require "json"
 
 def mock_gem(name, dependencies=[])
   mock_dependencies = dependencies.map { |depenency| mock(:name => depenency) }
