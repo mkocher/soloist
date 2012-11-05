@@ -6,17 +6,12 @@ describe Soloist::Spotlight do
   let(:shallow_path) { File.expand_path("beans/roger", tempdir) }
   let(:file_path) { File.expand_path("soloistrc", shallow_path) }
 
-  before { FileUtils.mkdir_p(shallow_path) }
-
-  describe "#parents" do
-    it "returns a list of search paths" do
-      spotlight.parents.should include Dir.tmpdir
-    end
+  before do
+    FileUtils.mkdir_p(shallow_path)
+    FileUtils.touch(file_path)
   end
 
   describe "#search_for" do
-    before { FileUtils.touch(file_path) }
-
     it "finds a soloistrc in the current directory" do
       spotlight.search_for("soloistrc").should == file_path
     end

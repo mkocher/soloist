@@ -1,18 +1,17 @@
+require 'pathname'
+
 module Soloist
   class Spotlight
-    attr_reader :path_parts
+    attr_reader :pathname
 
     def initialize(path)
-      @path_parts = path.split(File::SEPARATOR)
+      @pathname = Pathname.new(path)
     end
 
     def search_for(name)
-      parents.map{ |p| File.expand_path(name, p) }.detect{ |f| File.exists?(f) }
-    end
-
-    def parents
-      @parents ||= (0..path_parts.length).map do |last|
-        File.join(path_parts[0..last])
+      pathname.ascend do |path|
+        file_path = File.expand_path(name, path)
+        break file_path if File.exists?(file_path)
       end
     end
   end
