@@ -24,16 +24,38 @@ describe Soloist::CLI do
       end
 
       context "when the Cheffile does not exist" do
-        it "complains about not finding the Cheffile" do
+        it "runs chef" do
+          cli.should_receive(:exec)
           Dir.chdir(base_path) do
-            expect { cli.run_chef }.to raise_error(Errno::ENOENT)
+            cli.run_chef
+          end
+        end
+
+        it "does not run librarian" do
+          cli.stub(:exec)
+          Librarian::Chef::Cli.should_not_receive(:with_environment)
+
+          Dir.chdir(base_path) do
+            cli.run_chef
           end
         end
       end
 
       context "when the Cheffile exists" do
+        let(:cli_instance) { double(:cli_instance) }
         before do
           FileUtils.touch(File.expand_path("Cheffile", base_path))
+          cli.stub(:exec)
+        end
+
+        it "runs librarian" do
+          Librarian::Chef::Cli.should_receive(:with_environment).and_yield
+          Librarian::Chef::Cli.should_receive(:new).and_return(cli_instance)
+          cli_instance.should_receive(:install)
+
+          Dir.chdir(base_path) do
+            cli.run_chef
+          end
         end
 
         it "runs chef" do

@@ -16,7 +16,7 @@ module Soloist
       raise Soloist::NotFound.new("Could not find soloistrc") unless rc_path
       write_solo_rb
       write_node_json
-      install_cookbooks
+      install_cookbooks if cheffile_exists?
       exec("sudo bash -c '#{environment} #{chef_solo}'")
     end
 
@@ -49,6 +49,10 @@ module Soloist
     end
 
     private
+    def cheffile_exists?
+      File.exists?(File.expand_path("../Cheffile", rc_path))
+    end
+
     def chef_solo
       "chef-solo -j '#{node_json.path}' -c '#{solo_rb.path}' -l '#{log_level}'"
     end
