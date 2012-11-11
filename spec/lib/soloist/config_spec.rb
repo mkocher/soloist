@@ -58,27 +58,6 @@ describe Soloist::Config do
     end
   end
 
-  describe "#as_env" do
-    before { ENV.stub(:[]).and_return("supernuts") }
-
-    Soloist::Config::PROPAGATED_ENV.each do |variable|
-      it "propagates #{variable}" do
-        config.as_env[variable].should == "supernuts"
-      end
-    end
-
-    it "propagates env_variable_switches keys" do
-      soloist_rc.env_variable_switches = {"MONKEY_BRAINS" => "sure"}
-      config.as_env["MONKEY_BRAINS"].should == "supernuts"
-    end
-
-    it "removes empty environment variables" do
-      ENV.should_receive(:[]).with("TOE_FUNGUS").and_return(nil)
-      soloist_rc.env_variable_switches = {"TOE_FUNGUS" => "hooray"}
-      config.as_env.keys.should_not include "TOE_FUNGUS"
-    end
-  end
-
   describe "#compiled_rc" do
     let(:switch) { {"OX_TONGUES" => {"FINE" => {"recipes" => ["hobo_fist"]}}} }
 

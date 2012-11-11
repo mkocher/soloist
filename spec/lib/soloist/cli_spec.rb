@@ -25,32 +25,26 @@ describe Soloist::CLI do
 
       it "installs the proper recipes" do
         cli.stub(:exec)
-        Dir.chdir(base_path) do
-          cli.chef
-        end
+        Dir.chdir(base_path) { cli.chef }
         cli.config.royal_crown.recipes.should =~ ["stinky::feet"]
       end
 
       context "when the Cheffile does not exist" do
         it "runs chef" do
           cli.should_receive(:exec)
-          Dir.chdir(base_path) do
-            cli.chef
-          end
+          Dir.chdir(base_path) { cli.chef }
         end
 
         it "does not run librarian" do
           cli.stub(:exec)
           Librarian::Chef::Cli.should_not_receive(:with_environment)
-
-          Dir.chdir(base_path) do
-            cli.chef
-          end
+          Dir.chdir(base_path) { cli.chef }
         end
       end
 
       context "when the Cheffile exists" do
         let(:cli_instance) { double(:cli_instance) }
+
         before do
           FileUtils.touch(File.expand_path("Cheffile", base_path))
           cli.stub(:exec)
@@ -60,17 +54,12 @@ describe Soloist::CLI do
           Librarian::Chef::Cli.should_receive(:with_environment).and_yield
           Librarian::Chef::Cli.should_receive(:new).and_return(cli_instance)
           cli_instance.should_receive(:install)
-
-          Dir.chdir(base_path) do
-            cli.chef
-          end
+          Dir.chdir(base_path) { cli.chef }
         end
 
         it "runs chef" do
           cli.should_receive(:exec)
-          Dir.chdir(base_path) do
-            cli.chef
-          end
+          Dir.chdir(base_path) { cli.chef }
         end
       end
     end
@@ -119,6 +108,21 @@ describe Soloist::CLI do
         cli.should_not_receive(:system)
         cli.ensure_chef_cache_path
       end
+    end
+  end
+
+  describe "#chef_solo" do
+    before do
+      ENV["AUTREYISM"] = "pathological-yodeling"
+      FileUtils.touch(File.expand_path("soloistrc", base_path))
+    end
+
+    it "receives the outside environment" do
+      cli.stub(:chef_solo).and_return('echo $AUTREYISM')
+      cli.should_receive(:exec) do |chef_solo|
+        `#{chef_solo}`.chomp.should == "pathological-yodeling"
+      end
+      Dir.chdir(base_path) { cli.chef }
     end
   end
 end

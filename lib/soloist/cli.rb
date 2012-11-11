@@ -16,7 +16,7 @@ module Soloist
       write_solo_rb
       write_node_json
       install_cookbooks if cheffile_exists?
-      exec("sudo bash -c '#{environment} #{chef_solo}'")
+      exec("sudo -E bash -c '#{chef_solo}'")
     end
 
     desc "install", "Installs a recipe with chef-solo"
@@ -55,19 +55,15 @@ module Soloist
       def config
         @config ||= Soloist::Config.from_file(Dir.pwd, rc_path)
       end
+
+      def chef_solo
+        "chef-solo -j '#{node_json.path}' -c '#{solo_rb.path}' -l '#{log_level}'"
+      end
     end
 
     private
     def cheffile_exists?
       File.exists?(File.expand_path("../Cheffile", rc_path))
-    end
-
-    def chef_solo
-      "chef-solo -j '#{node_json.path}' -c '#{solo_rb.path}' -l '#{log_level}'"
-    end
-
-    def environment
-      config.as_env.map{ |k, v| "#{k}=#{v}" }.join(" ")
     end
 
     def log_level
