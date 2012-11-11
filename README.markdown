@@ -14,15 +14,15 @@ Prerequisites
 
 1. You'll need a `Cheffile` that points [Librarian](https://github.com/applicationsonline/librarian) to all the cookbooks you've included.  Check out their documentation about how to create one.  It looks like this:
 
-       site "http://community.opscode.com/api/v1"
-       cookbook "pivotal_workstation",
-                :git => "https://github.com/pivotal/pivotal_workstation"
+        site "http://community.opscode.com/api/v1"
+        cookbook "pivotal_workstation",
+                 :git => "https://github.com/pivotal/pivotal_workstation"
 
 2. You'll need to create a `soloistrc` file.  It looks like this:
 
-       recipes:
-         - pivotal_workstation::default
-         - pivotal_workstation::sublime_text
+        recipes:
+          - pivotal_workstation::default
+          - pivotal_workstation::sublime_text
 
 How does Soloist work?
 ----------------------
@@ -42,7 +42,7 @@ Here's an example of a `soloistrc`:
       - beans::chili
       - beans::food_fight
       - napkins
- 
+
 This tells Soloist to search in both `/opt/beans` and `./cookbooks` (relative to the `soloistrc`) for cookbooks to run.  Then, it attempts to converge the `beans::chili`, `beans::food_fight` and `napkins` recipes.
 
 ##### Running one-off recipes
