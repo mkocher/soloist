@@ -8,16 +8,21 @@ module Soloist
   class NotFound < RuntimeError; end
 
   class CLI < Thor
-    default_task :run_chef
+    default_task :chef
 
-    desc "run_chef", "Runs chef-solo like a baws"
-    def run_chef
+    desc "chef", "Runs chef-solo like a baws"
+    def chef
       ensure_chef_cache_path
-      raise Soloist::NotFound.new("Could not find soloistrc") unless rc_path
       write_solo_rb
       write_node_json
       install_cookbooks if cheffile_exists?
       exec("sudo bash -c '#{environment} #{chef_solo}'")
+    end
+
+    desc "install", "Installs a recipe with chef-solo"
+    def install(*recipes)
+      config.royal_crown.recipes = recipes
+      chef
     end
 
     no_tasks do
@@ -46,6 +51,10 @@ module Soloist
           end
         end
       end
+
+      def config
+        @config ||= Soloist::Config.from_file(Dir.pwd, rc_path)
+      end
     end
 
     private
@@ -73,13 +82,11 @@ module Soloist
       @node_json ||= Tempfile.new(["node", ".json"])
     end
 
-    def config
-      @config ||= Soloist::Config.from_file(Dir.pwd, rc_path)
-    end
-
     def rc_path
       @rc_path ||= ["soloistrc", ".soloistrc"].detect do |file_name|
         spotlight.search_for(file_name)
+      end.tap do |path|
+        raise Soloist::NotFound.new("Could not find soloistrc") unless path
       end
     end
 

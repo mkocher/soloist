@@ -7,11 +7,11 @@ describe Soloist::CLI do
 
   before { FileUtils.mkdir_p(base_path) }
 
-  describe "#run_chef" do
+  describe "#chef" do
     context "when the soloistrc file does not exist" do
       it "raises an error" do
         Dir.chdir(base_path) do
-          expect { cli.run_chef }.to raise_error(Soloist::NotFound)
+          expect { cli.chef }.to raise_error(Soloist::NotFound)
         end
       end
     end
@@ -23,11 +23,19 @@ describe Soloist::CLI do
         end
       end
 
+      it "installs the proper recipes" do
+        cli.stub(:exec)
+        Dir.chdir(base_path) do
+          cli.chef
+        end
+        cli.config.royal_crown.recipes.should =~ ["stinky::feet"]
+      end
+
       context "when the Cheffile does not exist" do
         it "runs chef" do
           cli.should_receive(:exec)
           Dir.chdir(base_path) do
-            cli.run_chef
+            cli.chef
           end
         end
 
@@ -36,7 +44,7 @@ describe Soloist::CLI do
           Librarian::Chef::Cli.should_not_receive(:with_environment)
 
           Dir.chdir(base_path) do
-            cli.run_chef
+            cli.chef
           end
         end
       end
@@ -54,15 +62,41 @@ describe Soloist::CLI do
           cli_instance.should_receive(:install)
 
           Dir.chdir(base_path) do
-            cli.run_chef
+            cli.chef
           end
         end
 
         it "runs chef" do
           cli.should_receive(:exec)
           Dir.chdir(base_path) do
-            cli.run_chef
+            cli.chef
           end
+        end
+      end
+    end
+  end
+
+  describe "#install" do
+    context "when the soloistrc does not exist" do
+      it "raises an error" do
+        expect do
+          cli.install("pineapple::wut")
+        end.to raise_error(Soloist::NotFound)
+      end
+    end
+
+    context "when the soloistrc file exists" do
+      before do
+        File.open(soloistrc_path, "w") do |file|
+          file.write(YAML.dump("recipes" => ["pineapple::wutcake"]))
+        end
+      end
+
+      it "sets a recipe to run" do
+        Dir.chdir(base_path) do
+          cli.should_receive(:chef)
+          cli.install("angst::teenage", "ennui::default")
+          cli.config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
         end
       end
     end
