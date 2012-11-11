@@ -38,9 +38,11 @@ module Soloist
 
     def compiled_rc
       @compiled_rc ||= royal_crown.dup.tap do |rc|
-        rc.delete("env_variable_switches").each do |variable, switch|
-          switch.each do |value, mergeable|
-            rc.merge!(mergeable) if ENV[variable] == value
+        while rc["env_variable_switches"]
+          rc.delete("env_variable_switches").each do |variable, switch|
+            switch.each do |value, inner|
+              rc.merge!(inner) if ENV[variable] == value
+            end
           end
         end
       end
