@@ -2,12 +2,9 @@
 
 [![Build Status](https://secure.travis-ci.org/mkocher/soloist.png)](http://travis-ci.org/mkocher/soloist)
 
-A Brief History
----------------
+Soloist lets you quickly and easily converge [Chef](http://opscode.com/chef) recipes using [chef-solo](http://wiki.opscode.com/display/chef/Chef+Solo).  It does not require a Chef server, but can exploit [community](http://community.opscode.com/cookbooks), github-hosted and locally-sourced cookbooks.
 
-Traditionally, using `chef-solo` meant hand-rolling `solo.rb` and some `node.json` file.  Then, you run `chef-solo -c solo.rb -j node.json` and remember, yet again, that you need to prefix the whole thing with `sudo`.
-
-Meanwhile, back in the modern world, tools like Bundler and Vagrant have one authoritative file for their configuration data.  Soloist attempts to rectify this situation.
+Soloist was originally built to support the [Pivotal Labs Workstation Cookbook](https://github.com/pivotal/pivotal_workstation).
 
 Prerequisites
 -------------
