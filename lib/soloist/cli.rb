@@ -5,8 +5,6 @@ require "tempfile"
 require "thor"
 
 module Soloist
-  class NotFound < RuntimeError; end
-
   class CLI < Thor
     default_task :chef
 
@@ -79,15 +77,7 @@ module Soloist
     end
 
     def rc_path
-      @rc_path ||= ["soloistrc", ".soloistrc"].detect do |file_name|
-        spotlight.search_for(file_name)
-      end.tap do |path|
-        raise Soloist::NotFound.new("Could not find soloistrc") unless path
-      end
-    end
-
-    def spotlight
-      @spotlight ||= Soloist::Spotlight.new(Dir.pwd)
+      @rc_path ||= Soloist::Spotlight.find!("soloistrc", ".soloistrc")
     end
   end
 end

@@ -10,9 +10,14 @@ describe Soloist::CLI do
   describe "#chef" do
     context "when the soloistrc file does not exist" do
       it "raises an error" do
-        Dir.chdir(base_path) do
-          expect { cli.chef }.to raise_error(Soloist::NotFound)
-        end
+        expect do
+          begin
+            Dir.chdir(base_path) { cli.chef }
+          rescue Soloist::NotFound => e
+            e.message.should == "Could not find soloistrc or .soloistrc"
+            raise
+          end
+        end.to raise_error(Soloist::NotFound)
       end
     end
 
