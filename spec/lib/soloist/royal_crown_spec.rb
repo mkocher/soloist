@@ -15,6 +15,18 @@ describe Soloist::RoyalCrown do
     let(:royal_crown) { Soloist::RoyalCrown.from_file(tempfile.path) }
 
     describe ".from_file" do
+      context "when the rc file is empty" do
+        let(:tempfile) do
+          Tempfile.new("soloist-royalcrown").tap do |file|
+            file.close
+          end
+        end
+
+        it "loads an empty file" do
+          expect { royal_crown }.not_to raise_error
+        end
+      end
+
       it "loads from a yaml file" do
         royal_crown.recipes.should =~ ["broken_vim"]
       end

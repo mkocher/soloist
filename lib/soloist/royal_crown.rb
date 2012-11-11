@@ -40,9 +40,12 @@ module Soloist
     end
 
     def self.read_config(yaml_file)
-      YAML.load_file(yaml_file).tap do |hash|
-        nilable_properties.each { |key| hash.delete(key) if hash[key].nil? }
-      end
+      content = File.read(yaml_file)
+      YAML.load(content).tap do |hash|
+        nilable_properties.each do |key|
+          hash.delete(key) if hash[key].nil?
+        end if hash
+      end || {}
     end
 
     private
