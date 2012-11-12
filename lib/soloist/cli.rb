@@ -17,8 +17,8 @@ module Soloist
       exec("sudo -E bash -c '#{chef_solo}'")
     end
 
-    desc "install", "Installs a recipe with chef-solo"
-    def install(*recipes)
+    desc "DO_IT_LIVE", "Runs an individual recipe with chef-solo"
+    def DO_IT_LIVE(*recipes)
       config.royal_crown.recipes = recipes
       chef
     end
@@ -51,7 +51,7 @@ module Soloist
       end
 
       def config
-        @config ||= Soloist::Config.from_file(Dir.pwd, rc_path)
+        @config ||= Soloist::Config.from_file(rc_path)
       end
 
       def chef_solo

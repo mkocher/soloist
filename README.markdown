@@ -12,14 +12,14 @@ Using Soloist
 
 Let's say you want to converge the Pivotal Labs Workstation default recipe and install Sublime Text 2.
 
-1. You'll need to have Soloist installed: 
+1. You'll need to have Soloist installed:
 
         $ gem install soloist
 
 1. You'll need a `Cheffile` in your home directory that points Librarian to all the cookbooks you've included:
 
         $ cat /Users/pivotal/Cheffile
-        site "http://community.opscode.com/api/v1"        
+        site "http://community.opscode.com/api/v1"
         cookbook "pivotal_workstation",
                  :git => "https://github.com/pivotal/pivotal_workstation"
 
@@ -94,13 +94,13 @@ If we set `MEGA_PRODUCTION=godspeed`, the `embarrassment::parental` recipe is no
 
 Soloist can also run one-off recipes:
 
-    $ soloist install lice::box
+    $ soloist DO_IT_LIVE lice::box
     Installing lice (1.0.0)
     … chef output …
     INFO: Run List expands to [lice::box]
     … chef output …
 
-This just installs the `lice::box` recipe from your current set of cookbooks.  It still uses all the `node_attributes` and `env_variable_switches` logic.
+This just runs the `lice::box` recipe from your current set of cookbooks.  It still uses all the `node_attributes` and `env_variable_switches` logic.
 
 
 ##### Chef logging

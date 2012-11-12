@@ -28,7 +28,7 @@ describe Soloist::CLI do
         end
       end
 
-      it "installs the proper recipes" do
+      it "runs the proper recipes" do
         cli.stub(:exec)
         Dir.chdir(base_path) { cli.chef }
         cli.config.royal_crown.recipes.should =~ ["stinky::feet"]
@@ -70,11 +70,11 @@ describe Soloist::CLI do
     end
   end
 
-  describe "#install" do
+  describe "#DO_IT_LIVE" do
     context "when the soloistrc does not exist" do
       it "raises an error" do
         expect do
-          Dir.chdir(base_path) { cli.install("pineapple::wut") }
+          Dir.chdir(base_path) { cli.DO_IT_LIVE("pineapple::wut") }
         end.to raise_error(Soloist::NotFound)
       end
     end
@@ -89,7 +89,7 @@ describe Soloist::CLI do
       it "sets a recipe to run" do
         Dir.chdir(base_path) do
           cli.should_receive(:chef)
-          cli.install("angst::teenage", "ennui::default")
+          cli.DO_IT_LIVE("angst::teenage", "ennui::default")
           cli.config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
         end
       end

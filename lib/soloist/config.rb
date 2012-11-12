@@ -2,21 +2,20 @@ require "soloist/royal_crown"
 
 module Soloist
   class Config
-    attr_reader :working_path, :royal_crown
+    attr_reader :royal_crown
 
-    def self.from_file(working_path, royal_crown_path)
+    def self.from_file(royal_crown_path)
       rc = Soloist::RoyalCrown.from_file(royal_crown_path)
-      new(working_path, rc)
+      new(rc)
     end
 
-    def initialize(working_path, royal_crown)
-      @working_path = working_path
+    def initialize(royal_crown)
       @royal_crown = royal_crown
     end
 
     def as_solo_rb
       cookbook_paths.uniq.map do |cookbook_path|
-        %{cookbook_path "#{File.expand_path(cookbook_path)}"}
+        %{cookbook_path "#{File.expand_path(cookbook_path, bash_path)}"}
       end
     end
 
@@ -39,8 +38,12 @@ module Soloist
     end
 
     private
+    def bash_path
+      File.expand_path("..", royal_crown.path)
+    end
+
     def cookbook_paths
-      [File.expand_path("cookbooks", working_path)] + compiled_rc.cookbook_paths
+      ["cookbooks"] + compiled_rc.cookbook_paths
     end
   end
 end

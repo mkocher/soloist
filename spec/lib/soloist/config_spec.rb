@@ -1,14 +1,14 @@
 require "spec_helper"
 
 describe Soloist::Config do
-  let(:soloist_rc) { Soloist::RoyalCrown.new }
-  let(:config) { Soloist::Config.new("/yo/dawg", soloist_rc) }
+  let(:soloist_rc) { Soloist::RoyalCrown.new(:path => "/tmp/soloist/soloistrc") }
+  let(:config) { Soloist::Config.new(soloist_rc) }
 
   describe "#as_solo_rb" do
     context "without extra cookbook paths" do
       it "can generate solo.rb" do
         config.as_solo_rb.should have(1).thing
-        config.as_solo_rb.should == ['cookbook_path "/yo/dawg/cookbooks"']
+        config.as_solo_rb.should == ['cookbook_path "/tmp/soloist/cookbooks"']
       end
     end
 
@@ -33,7 +33,7 @@ describe Soloist::Config do
       before { soloist_rc.cookbook_paths << "./meth/cookbooks" }
 
       it "can have multiple cookbook paths" do
-        config.as_solo_rb.should include "cookbook_path \"#{pwd}/meth/cookbooks\""
+        config.as_solo_rb.should include "cookbook_path \"/tmp/soloist/meth/cookbooks\""
       end
     end
 
