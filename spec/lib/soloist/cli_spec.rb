@@ -74,7 +74,7 @@ describe Soloist::CLI do
     context "when the soloistrc does not exist" do
       it "raises an error" do
         expect do
-          cli.install("pineapple::wut")
+          Dir.chdir(base_path) { cli.install("pineapple::wut") }
         end.to raise_error(Soloist::NotFound)
       end
     end
