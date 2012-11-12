@@ -6,11 +6,11 @@ Gem::Specification.new do |s|
   s.name        = "soloist"
   s.version     = Soloist::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Matthew Kocher"]
-  s.email       = ["kocher@gmail.com"]
+  s.authors     = ["Matthew Kocher", "Doc Ritezel"]
+  s.email       = ["kocher@gmail.com", "ritezel@gmail.com"]
   s.homepage    = "http://github.com/mkocher/soloist"
-  s.summary     = %q{Soloist is a simple way of running chef-solo}
-  s.description = %q{Soloist is an easy way of running chef solo, but it's not doing much.}
+  s.summary     = "Soloist is a simple way of running chef-solo"
+  s.description = "Makes running chef-solo easy."
 
   s.rubyforge_project = "soloist"
 
@@ -20,4 +20,13 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "chef"
+  s.add_dependency "librarian"
+  s.add_dependency "thor"
+  s.add_dependency "hashie"
+
+  s.add_development_dependency "rspec"
+  s.add_development_dependency "guard-rspec"
+  s.add_development_dependency "guard-bundler"
+  s.add_development_dependency "rb-fsevent"
+  s.add_development_dependency "terminal-notifier-guard"
 end
