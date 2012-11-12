@@ -7,8 +7,7 @@ describe Soloist::Config do
   describe "#as_solo_rb" do
     context "without extra cookbook paths" do
       it "can generate solo.rb" do
-        config.as_solo_rb.should have(1).thing
-        config.as_solo_rb.should == ['cookbook_path "/tmp/soloist/cookbooks"']
+        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks"]'
       end
     end
 
@@ -16,14 +15,13 @@ describe Soloist::Config do
       before { soloist_rc.cookbook_paths = ["/opt/holla/at/yo/soloist"] }
 
       it "can have multiple cookbook paths" do
-        config.as_solo_rb.should have(2).things
-        config.as_solo_rb.should include 'cookbook_path "/opt/holla/at/yo/soloist"'
+        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks", "/opt/holla/at/yo/soloist"]'
       end
 
       it "removes duplicate cookbook paths" do
         expect do
           soloist_rc.cookbook_paths << "/opt/holla/at/yo/soloist"
-        end.not_to change { config.as_solo_rb.count }
+        end.not_to change { config.as_solo_rb }
       end
     end
 
@@ -33,7 +31,7 @@ describe Soloist::Config do
       before { soloist_rc.cookbook_paths << "./meth/cookbooks" }
 
       it "can have multiple cookbook paths" do
-        config.as_solo_rb.should include "cookbook_path \"/tmp/soloist/meth/cookbooks\""
+        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks", "/tmp/soloist/meth/cookbooks"]'
       end
     end
 
@@ -43,7 +41,7 @@ describe Soloist::Config do
       before { soloist_rc.cookbook_paths << "~/yo/homes" }
 
       it "expands paths" do
-        config.as_solo_rb.should include "cookbook_path \"#{home}/yo/homes\""
+        config.as_solo_rb.should include "#{home}/yo/homes"
       end
     end
   end

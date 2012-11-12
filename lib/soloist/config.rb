@@ -14,9 +14,10 @@ module Soloist
     end
 
     def as_solo_rb
-      cookbook_paths.uniq.map do |cookbook_path|
-        %{cookbook_path "#{File.expand_path(cookbook_path, bash_path)}"}
+      paths = cookbook_paths.uniq.map do |cookbook_path|
+        File.expand_path(cookbook_path, bash_path)
       end
+      "cookbook_path #{paths.inspect}"
     end
 
     def as_json
@@ -39,7 +40,7 @@ module Soloist
 
     private
     def bash_path
-      File.expand_path("..", royal_crown.path)
+      File.dirname(royal_crown.path)
     end
 
     def cookbook_paths

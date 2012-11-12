@@ -17,7 +17,7 @@ module Soloist
       exec("sudo -E bash -c '#{chef_solo}'")
     end
 
-    desc "DO_IT_LIVE", "Runs an individual recipe with chef-solo"
+    desc "run_recipe", "Runs an individual recipe with chef-solo"
     def DO_IT_LIVE(*recipes)
       config.royal_crown.recipes = recipes
       chef
@@ -27,7 +27,7 @@ module Soloist
       def write_solo_rb
         content = config.as_solo_rb
         content.each{ |line| puts line } if log_level == "debug"
-        File.open(solo_rb.path, "w") { |f| f.write(content.join("\n")) }
+        File.open(solo_rb.path, "w") { |f| f.write(content) }
       end
 
       def write_node_json
