@@ -34,6 +34,22 @@ describe Soloist::CLI do
         cli.config.royal_crown.recipes.should =~ ["stinky::feet"]
       end
 
+      context "when a soloistrc_local file exists" do
+        let(:soloistrc_local_path) { File.expand_path("soloistrc_local", base_path) }
+
+        before do
+          File.open(soloistrc_local_path, "w") do |file|
+            file.write(YAML.dump("recipes" => ["stinky::socks"]))
+          end
+        end
+
+        it "installs the proper recipes" do
+          cli.stub(:exec)
+          Dir.chdir(base_path) { cli.chef }
+          cli.config.royal_crown.recipes.should =~ ["stinky::feet", "stinky::socks"]
+        end
+      end
+
       context "when the Cheffile does not exist" do
         it "runs chef" do
           cli.should_receive(:exec)

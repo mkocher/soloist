@@ -104,4 +104,22 @@ describe Soloist::Config do
       end
     end
   end
+
+  describe "#merge!" do
+    let(:soloist_rc) { Soloist::RoyalCrown.new(:recipes => ["guts"], :node_attributes => {:reliable => "maybe"}) }
+    let(:other_rc) { Soloist::RoyalCrown.new(:recipes => ["chum"], :node_attributes => {:tasty => "maybe"}) }
+    let(:other_config) { Soloist::Config.new("/yo/beans", other_rc) }
+
+    it "merges another config into the current one" do
+      config.merge!(other_config)
+      config.royal_crown.recipes.should =~ ["guts", "chum"]
+      config.royal_crown.node_attributes.keys.should =~ [:reliable, :tasty]
+    end
+
+    it "does not trample the other config" do
+      config.merge!(other_config)
+      other_config.royal_crown.recipes.should =~ ["chum"]
+      other_config.royal_crown.node_attributes.should == {:tasty => "maybe"}
+    end
+  end
 end

@@ -38,6 +38,13 @@ module Soloist
       end
     end
 
+    def merge!(other)
+      royal_crown.recipes += other.royal_crown.recipes
+      royal_crown.cookbook_paths += other.royal_crown.cookbook_paths
+      royal_crown.node_attributes.merge!(other.royal_crown.node_attributes)
+      royal_crown.env_variable_switches.merge!(other.royal_crown.env_variable_switches)
+    end
+
     private
     def bash_path
       File.dirname(royal_crown.path)

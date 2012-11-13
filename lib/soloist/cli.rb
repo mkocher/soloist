@@ -8,7 +8,7 @@ module Soloist
   class CLI < Thor
     default_task :chef
 
-    desc "chef", "Runs chef-solo like a baws"
+    desc "chef", "Runs chef-solo"
     def chef
       ensure_chef_cache_path
       write_solo_rb
@@ -51,7 +51,13 @@ module Soloist
       end
 
       def config
-        @config ||= Soloist::Config.from_file(rc_path)
+        @config ||= begin
+          Soloist::Config.from_file(rc_path).tap do |config|
+            Soloist::Config.from_file(rc_local_path).tap do |local|
+              config.merge!(local)
+            end if rc_local_path
+          end
+        end
       end
 
       def chef_solo
@@ -78,6 +84,10 @@ module Soloist
 
     def rc_path
       @rc_path ||= Soloist::Spotlight.find!("soloistrc", ".soloistrc")
+    end
+
+    def rc_local_path
+      @rc_local_path ||= Soloist::Spotlight.find("soloistrc_local", ".soloistrc_local")
     end
   end
 end
