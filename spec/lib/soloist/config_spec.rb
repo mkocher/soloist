@@ -108,7 +108,7 @@ describe Soloist::Config do
   describe "#merge!" do
     let(:soloist_rc) { Soloist::RoyalCrown.new(:recipes => ["guts"], :node_attributes => {:reliable => "maybe"}) }
     let(:other_rc) { Soloist::RoyalCrown.new(:recipes => ["chum"], :node_attributes => {:tasty => "maybe"}) }
-    let(:other_config) { Soloist::Config.new("/yo/beans", other_rc) }
+    let(:other_config) { Soloist::Config.new(other_rc) }
 
     it "merges another config into the current one" do
       config.merge!(other_config)
