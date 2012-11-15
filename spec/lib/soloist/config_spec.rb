@@ -1,8 +1,18 @@
 require "spec_helper"
 
 describe Soloist::Config do
+  include FakeFS::SpecHelpers
+
   let(:soloist_rc) { Soloist::RoyalCrown.new(:path => "/tmp/soloist/soloistrc") }
   let(:config) { Soloist::Config.new(soloist_rc) }
+
+  before do
+    # set up (fake) directories
+    FileUtils.mkdir_p("/tmp/soloist/cookbooks")
+    FileUtils.mkdir_p("/tmp/soloist/meth/cookbooks")
+    FileUtils.mkdir_p("/opt/holla/at/yo/soloist")
+    FileUtils.mkdir_p("#{ENV['HOME']}/yo/homes")
+  end
 
   describe "#as_solo_rb" do
     context "without extra cookbook paths" do
@@ -22,6 +32,15 @@ describe Soloist::Config do
         expect do
           soloist_rc.cookbook_paths << "/opt/holla/at/yo/soloist"
         end.not_to change { config.as_solo_rb }
+      end
+    end
+
+    context "with a cookbook path to a non-existent directory" do
+      before { soloist_rc.cookbook_paths = ["/some/bogus/path"] }
+
+      it "prunes the config of the empty path" do
+        File.should_not exist("/some/bogus/path")
+        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks"]'
       end
     end
 
