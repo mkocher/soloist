@@ -17,6 +17,7 @@ module Soloist
       paths = cookbook_paths.uniq.map do |cookbook_path|
         File.expand_path(cookbook_path, bash_path)
       end
+      paths.reject! { |path| ! File.exist?(path) }
       "cookbook_path #{paths.inspect}"
     end
 
