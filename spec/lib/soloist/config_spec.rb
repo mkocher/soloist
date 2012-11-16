@@ -1,66 +1,78 @@
 require "spec_helper"
 
 describe Soloist::Config do
-  include FakeFS::SpecHelpers
-
-  let(:soloist_rc) { Soloist::RoyalCrown.new(:path => "/tmp/soloist/soloistrc") }
+  let(:tempdir) { Dir.mktmpdir }
+  let(:soloist_rc_path) { File.expand_path("soloistrc", tempdir) }
+  let(:soloist_rc) { Soloist::RoyalCrown.new(:path => soloist_rc_path) }
   let(:config) { Soloist::Config.new(soloist_rc) }
-
-  before do
-    # set up (fake) directories
-    FileUtils.mkdir_p("/tmp/soloist/cookbooks")
-    FileUtils.mkdir_p("/tmp/soloist/meth/cookbooks")
-    FileUtils.mkdir_p("/opt/holla/at/yo/soloist")
-    FileUtils.mkdir_p("#{ENV['HOME']}/yo/homes")
-  end
+  let(:cookbook_path) { File.expand_path("cookbooks", tempdir) }
+  let(:nested_cookbook_path) { File.expand_path("whoa/cookbooks", tempdir) }
 
   describe "#as_solo_rb" do
-    context "without extra cookbook paths" do
-      it "can generate solo.rb" do
-        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks"]'
+    context "when the default cookbook path does not exist" do
+      it "does not point to any cookbook paths" do
+        config.as_solo_rb.should == 'cookbook_path []'
       end
     end
 
-    context "with a cookbook path" do
-      before { soloist_rc.cookbook_paths = ["/opt/holla/at/yo/soloist"] }
+    context "when the default cookbook path exists" do
+      before { FileUtils.mkdir_p(cookbook_path) }
 
-      it "can have multiple cookbook paths" do
-        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks", "/opt/holla/at/yo/soloist"]'
+      it "points to the default cookbook path" do
+        config.as_solo_rb.should == %(cookbook_path ["#{cookbook_path}"])
       end
 
-      it "removes duplicate cookbook paths" do
-        expect do
-          soloist_rc.cookbook_paths << "/opt/holla/at/yo/soloist"
-        end.not_to change { config.as_solo_rb }
-      end
-    end
+      context "with a specified cookbook path" do
+        before { soloist_rc.cookbook_paths = [nested_cookbook_path] }
 
-    context "with a cookbook path to a non-existent directory" do
-      before { soloist_rc.cookbook_paths = ["/some/bogus/path"] }
+        context "when the specified path exists" do
+          before { FileUtils.mkdir_p(nested_cookbook_path) }
 
-      it "prunes the config of the empty path" do
-        File.should_not exist("/some/bogus/path")
-        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks"]'
+          it "can have multiple cookbook paths" do
+            config.as_solo_rb.should == %(cookbook_path ["#{cookbook_path}", "#{nested_cookbook_path}"])
+          end
+
+          context "with duplicate cookbook paths" do
+            it "ignores duplicate entries" do
+              expect do
+                soloist_rc.cookbook_paths << nested_cookbook_path
+              end.not_to change { config.as_solo_rb }
+            end
+
+            it "ignores the default cookbook path" do
+              expect do
+                soloist_rc.cookbook_paths << cookbook_path
+              end.not_to change { config.as_solo_rb }
+            end
+          end
+        end
+
+        context "when the specified path does not exist" do
+          it "only points to default cookbook path" do
+            config.as_solo_rb.should == %(cookbook_path ["#{cookbook_path}"])
+          end
+        end
       end
     end
 
     context "with relative paths" do
-      let(:pwd) { File.expand_path(".") }
-
-      before { soloist_rc.cookbook_paths << "./meth/cookbooks" }
+      before do
+        soloist_rc.cookbook_paths << "./whoa/cookbooks"
+        FileUtils.mkdir_p(nested_cookbook_path)
+      end
 
       it "can have multiple cookbook paths" do
-        config.as_solo_rb.should == 'cookbook_path ["/tmp/soloist/cookbooks", "/tmp/soloist/meth/cookbooks"]'
+        config.as_solo_rb.should == %(cookbook_path ["#{nested_cookbook_path}"])
       end
     end
 
     context "with unixisms in the cookbook path" do
       let(:home) { File.expand_path("~") }
 
-      before { soloist_rc.cookbook_paths << "~/yo/homes" }
+      before { soloist_rc.cookbook_paths = ["~"] }
 
       it "expands paths" do
-        config.as_solo_rb.should include "#{home}/yo/homes"
+        config.as_solo_rb.should == %(cookbook_path ["#{home}"])
       end
     end
   end

@@ -14,11 +14,7 @@ module Soloist
     end
 
     def as_solo_rb
-      paths = cookbook_paths.uniq.map do |cookbook_path|
-        File.expand_path(cookbook_path, bash_path)
-      end
-      paths.reject! { |path| ! File.exist?(path) }
-      "cookbook_path #{paths.inspect}"
+      "cookbook_path #{expanded_cookbook_directories.inspect}"
     end
 
     def as_json
@@ -47,12 +43,24 @@ module Soloist
     end
 
     private
-    def bash_path
-      File.dirname(royal_crown.path)
+    def expanded_cookbook_directories
+      expanded_cookbook_paths.select { |path| File.directory?(path) }
+    end
+
+    def expanded_cookbook_paths
+      cookbook_paths.map { |path| File.expand_path(path, royal_crown_path) }.uniq
     end
 
     def cookbook_paths
-      ["cookbooks"] + compiled_rc.cookbook_paths
+      [royal_crown_cookbooks_directory] + compiled_rc.cookbook_paths
+    end
+
+    def royal_crown_cookbooks_directory
+      File.expand_path("cookbooks", royal_crown_path)
+    end
+
+    def royal_crown_path
+      File.dirname(royal_crown.path)
     end
   end
 end
