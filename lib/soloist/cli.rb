@@ -1,6 +1,7 @@
 require "librarian/chef/cli"
 require "soloist/spotlight"
 require "soloist/config"
+require "soloist/remote"
 require "tempfile"
 require "thor"
 
