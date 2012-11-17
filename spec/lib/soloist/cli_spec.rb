@@ -78,9 +78,24 @@ describe Soloist::CLI do
           Dir.chdir(base_path) { cli.chef }
         end
 
-        it "runs chef" do
-          cli.should_receive(:exec)
-          Dir.chdir(base_path) { cli.chef }
+        context "when the user is not root" do
+          it "creates the cache path using sudo" do
+            cli.should_receive(:exec) do |command|
+              command.should =~ /^sudo -E/
+            end
+            Dir.chdir(base_path) { cli.chef }
+          end
+        end
+
+        context "when the user is root" do
+          before { Process.stub(:uid => 0) }
+
+          it "creates the cache path" do
+            cli.should_receive(:exec) do |command|
+              command.should_not =~ /^sudo -E/
+            end
+            Dir.chdir(base_path) { cli.chef }
+          end
         end
       end
     end
@@ -116,9 +131,20 @@ describe Soloist::CLI do
     context "when the cache path does not exist" do
       before { File.stub(:directory? => false) }
 
-      it "creates the cache path" do
-        cli.should_receive(:system).with("sudo mkdir -p /var/chef/cache")
-        cli.ensure_chef_cache_path
+      context "when the user is not root" do
+        it "creates the cache path using sudo" do
+          cli.should_receive(:system).with("sudo -E mkdir -p /var/chef/cache")
+          cli.ensure_chef_cache_path
+        end
+      end
+
+      context "when the user is root" do
+        before { Process.stub(:uid => 0) }
+
+        it "creates the cache path using sudo" do
+          cli.should_receive(:system).with("mkdir -p /var/chef/cache")
+          cli.ensure_chef_cache_path
+        end
       end
     end
 

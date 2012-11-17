@@ -14,7 +14,7 @@ module Soloist
       write_solo_rb
       write_node_json
       install_cookbooks if cheffile_exists?
-      exec("sudo -E bash -c '#{chef_solo}'")
+      exec(conditional_sudo("bash -c '#{chef_solo}'"))
     end
 
     desc "run_recipe", "Runs an individual recipe with chef-solo"
@@ -38,7 +38,7 @@ module Soloist
 
       def ensure_chef_cache_path
         unless File.directory?("/var/chef/cache")
-          system("sudo mkdir -p /var/chef/cache")
+          system(conditional_sudo("mkdir -p /var/chef/cache"))
         end
       end
 
@@ -66,6 +66,14 @@ module Soloist
     end
 
     private
+    def conditional_sudo(command)
+      root? ? command : "sudo -E #{command}"
+    end
+
+    def root?
+      Process.uid == 0
+    end
+
     def cheffile_exists?
       File.exists?(File.expand_path("../Cheffile", rc_path))
     end
