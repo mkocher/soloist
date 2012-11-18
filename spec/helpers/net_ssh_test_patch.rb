@@ -21,3 +21,18 @@ class Net::SSH::Test::Channel
     script.gets_channel_extended_data(self, data)
   end
 end
+
+class Net::SSH::Test::Kex
+  def exchange_keys
+    result = Net::SSH::Buffer.from(:byte, NEWKEYS)
+    @connection.send_message(result)
+
+    buffer = @connection.next_message
+    raise Net::SSH::Exception, "expected NEWKEYS" unless buffer.type == NEWKEYS
+
+    { :session_id        => "abc-xyz",
+      :server_key        => OpenSSL::PKey::RSA.new(512),
+      :shared_secret     => OpenSSL::BN.new("1234567890", 10),
+      :hashing_algorithm => OpenSSL::Digest::SHA1 }
+  end
+end
