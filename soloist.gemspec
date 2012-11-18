@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency "thor"
   s.add_dependency "hashie"
   s.add_dependency "net-ssh"
+  s.add_dependency "awesome_print"
 
   s.add_development_dependency "godot"
   s.add_development_dependency "rspec"

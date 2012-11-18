@@ -8,18 +8,22 @@ describe Soloist::Config do
   let(:cookbook_path) { File.expand_path("cookbooks", tempdir) }
   let(:nested_cookbook_path) { File.expand_path("whoa/cookbooks", tempdir) }
 
-  describe "#as_solo_rb" do
+  describe "#solo_rb" do
+    subject { config.solo_rb.tap { |f| f.rewind }.read }
+
     context "when the default cookbook path does not exist" do
-      it "does not point to any cookbook paths" do
-        config.as_solo_rb.should == 'cookbook_path []'
-      end
+      it { should == 'cookbook_path []' }
     end
 
     context "when the default cookbook path exists" do
       before { FileUtils.mkdir_p(cookbook_path) }
 
-      it "points to the default cookbook path" do
-        config.as_solo_rb.should == %(cookbook_path ["#{cookbook_path}"])
+      it { should == %(cookbook_path ["#{cookbook_path}"]) }
+
+      context "when the default cookbook path is specified" do
+        before { soloist_rc.cookbook_paths << cookbook_path }
+
+        it { should == %(cookbook_path ["#{cookbook_path}"]) }
       end
 
       context "with a specified cookbook path" do
@@ -28,42 +32,28 @@ describe Soloist::Config do
         context "when the specified path exists" do
           before { FileUtils.mkdir_p(nested_cookbook_path) }
 
-          it "can have multiple cookbook paths" do
-            config.as_solo_rb.should == %(cookbook_path ["#{cookbook_path}", "#{nested_cookbook_path}"])
-          end
+          it { should == %(cookbook_path ["#{cookbook_path}", "#{nested_cookbook_path}"]) }
 
           context "with duplicate cookbook paths" do
-            it "ignores duplicate entries" do
-              expect do
-                soloist_rc.cookbook_paths << nested_cookbook_path
-              end.not_to change { config.as_solo_rb }
-            end
+            before { soloist_rc.cookbook_paths << nested_cookbook_path }
 
-            it "ignores the default cookbook path" do
-              expect do
-                soloist_rc.cookbook_paths << cookbook_path
-              end.not_to change { config.as_solo_rb }
-            end
+            it { should == %(cookbook_path ["#{cookbook_path}", "#{nested_cookbook_path}"]) }
           end
         end
 
         context "when the specified path does not exist" do
-          it "only points to default cookbook path" do
-            config.as_solo_rb.should == %(cookbook_path ["#{cookbook_path}"])
-          end
+          it { should == %(cookbook_path ["#{cookbook_path}"]) }
         end
       end
     end
 
     context "with relative paths" do
       before do
-        soloist_rc.cookbook_paths << "./whoa/cookbooks"
+        soloist_rc.cookbook_paths = ["./whoa/cookbooks"]
         FileUtils.mkdir_p(nested_cookbook_path)
       end
 
-      it "can have multiple cookbook paths" do
-        config.as_solo_rb.should == %(cookbook_path ["#{nested_cookbook_path}"])
-      end
+      it { should == %(cookbook_path ["#{nested_cookbook_path}"]) }
     end
 
     context "with unixisms in the cookbook path" do
@@ -71,18 +61,18 @@ describe Soloist::Config do
 
       before { soloist_rc.cookbook_paths = ["~"] }
 
-      it "expands paths" do
-        config.as_solo_rb.should == %(cookbook_path ["#{home}"])
-      end
+      it { should == %(cookbook_path ["#{home}"]) }
     end
   end
 
-  describe "#as_json" do
+  describe "#node_json" do
+    let(:node_json) { JSON.parse(config.node_json.tap{ |f| f.rewind }.read) }
+
     context "with recipes" do
       before { soloist_rc.recipes = ["waffles"] }
 
       it "can generate json" do
-        config.as_json["recipes"].should include "waffles"
+        node_json["recipes"].should include "waffles"
       end
     end
   end

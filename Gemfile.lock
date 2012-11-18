@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     soloist (1.0.0.pre)
+      awesome_print
       chef
       hashie
       librarian
@@ -12,6 +13,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     archive-tar-minitar (0.5.2)
+    awesome_print (1.1.0)
     bunny (0.7.9)
     chef (10.16.2)
       bunny (>= 0.6.0, < 0.8.0)
