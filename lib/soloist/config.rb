@@ -1,26 +1,36 @@
 require "soloist/royal_crown"
+require "tempfile"
 
 module Soloist
   class Config
-    attr_reader :royal_crown
+    attr_reader :royal_crown, :log_level
 
-    def self.from_file(royal_crown_path)
+    def self.from_file(royal_crown_path, log_level = "info")
       rc = Soloist::RoyalCrown.from_file(royal_crown_path)
-      new(rc)
+      new(rc, log_level)
     end
 
-    def initialize(royal_crown)
+    def initialize(royal_crown, log_level = "info")
       @royal_crown = royal_crown
+      @log_level = log_level
     end
 
-    def as_solo_rb
-      "cookbook_path #{expanded_cookbook_directories.inspect}"
+    def chef_solo
+      "chef-solo -j '#{node_json.path}' -c '#{solo_rb.path}' -l '#{log_level}'"
     end
 
-    def as_json
-      {
-        "recipes" => compiled_rc.recipes
-      }
+    def solo_rb
+      @solo_rb ||= Tempfile.new(["solo", ".rb"]).tap do |file|
+        puts content if debug?
+        file.write(as_solo_rb)
+      end
+    end
+
+    def node_json
+      @node_json ||= Tempfile.new(["node", ".json"]).tap do |file|
+        puts JSON.pretty_generate(content) if debug?
+        file.write(JSON.dump(as_node_json))
+      end
     end
 
     def compiled_rc
@@ -43,6 +53,18 @@ module Soloist
     end
 
     private
+    def debug?
+      log_level == "debug"
+    end
+
+    def as_solo_rb
+      "cookbook_path #{expanded_cookbook_directories.inspect}"
+    end
+
+    def as_node_json
+      { "recipes" => compiled_rc.recipes }
+    end
+
     def expanded_cookbook_directories
       expanded_cookbook_paths.select { |path| File.directory?(path) }
     end

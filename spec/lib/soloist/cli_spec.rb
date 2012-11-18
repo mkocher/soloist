@@ -31,7 +31,7 @@ describe Soloist::CLI do
       it "runs the proper recipes" do
         cli.stub(:exec)
         Dir.chdir(base_path) { cli.chef }
-        cli.config.royal_crown.recipes.should =~ ["stinky::feet"]
+        cli.soloist_config.royal_crown.recipes.should =~ ["stinky::feet"]
       end
 
       context "when a soloistrc_local file exists" do
@@ -46,7 +46,7 @@ describe Soloist::CLI do
         it "installs the proper recipes" do
           cli.stub(:exec)
           Dir.chdir(base_path) { cli.chef }
-          cli.config.royal_crown.recipes.should =~ ["stinky::feet", "stinky::socks"]
+          cli.soloist_config.royal_crown.recipes.should =~ ["stinky::feet", "stinky::socks"]
         end
       end
 
@@ -101,11 +101,11 @@ describe Soloist::CLI do
     end
   end
 
-  describe "#DO_IT_LIVE" do
+  describe "#run_recipe" do
     context "when the soloistrc does not exist" do
       it "raises an error" do
         expect do
-          Dir.chdir(base_path) { cli.DO_IT_LIVE("pineapple::wut") }
+          Dir.chdir(base_path) { cli.run_recipe("pineapple::wut") }
         end.to raise_error(Soloist::NotFound)
       end
     end
@@ -120,10 +120,22 @@ describe Soloist::CLI do
       it "sets a recipe to run" do
         Dir.chdir(base_path) do
           cli.should_receive(:chef)
-          cli.DO_IT_LIVE("angst::teenage", "ennui::default")
-          cli.config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
+          cli.run_recipe("angst::teenage", "ennui::default")
+          cli.soloist_config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
         end
       end
+    end
+  end
+
+  describe "#config" do
+    let(:royal_crown) { Soloist::RoyalCrown.new }
+    let(:config) { Soloist::Config.new(royal_crown) }
+
+    before { cli.stub(:soloist_config => config) }
+
+    it "prints the hash render of the RoyalCrown" do
+      Kernel.should_receive(:ap).with({"recipes"=>[], "cookbook_paths"=>[], "node_attributes"=>{}})
+      cli.config
     end
   end
 
@@ -158,18 +170,20 @@ describe Soloist::CLI do
     end
   end
 
-  describe "#chef_solo" do
+  describe "#chef" do
     before do
       ENV["AUTREYISM"] = "pathological-yodeling"
       FileUtils.touch(File.expand_path("soloistrc", base_path))
     end
 
     it "receives the outside environment" do
-      cli.stub(:chef_solo).and_return('echo $AUTREYISM')
       cli.should_receive(:exec) do |chef_solo|
         `#{chef_solo}`.chomp.should == "pathological-yodeling"
       end
-      Dir.chdir(base_path) { cli.chef }
+      Dir.chdir(base_path) do
+        cli.soloist_config.stub(:chef_solo).and_return('echo $AUTREYISM')
+        cli.chef
+      end
     end
   end
 end
