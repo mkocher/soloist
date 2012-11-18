@@ -1,4 +1,5 @@
 require "librarian/chef/cli"
+require "soloist/known_hosts"
 require "soloist/spotlight"
 require "soloist/config"
 require "soloist/remote"
