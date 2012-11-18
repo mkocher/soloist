@@ -5,7 +5,7 @@ describe Soloist::KnownHosts do
   let(:key_blob) { "AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" }
   let(:key) { Net::SSH::Buffer.new(key_blob.unpack("m*").first).read_key }
 
-  subject { Soloist::KnownHosts.new(known_hosts) }
+  subject { Soloist::KnownHosts.new(known_hosts.path) }
 
   describe "#include?" do
     context "when the known hosts file does not have the host" do
