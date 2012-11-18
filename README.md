@@ -113,4 +113,4 @@ Soloist runs `chef-solo` at log level `info` by default, which is helpful when y
 License
 =======
 
-See MIT-LICENSE for details.
+See LICENSE for details.
