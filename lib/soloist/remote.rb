@@ -6,6 +6,7 @@ module Soloist
 
   class Remote
     attr_reader :ip, :key, :user, :timeout, :stdout, :stderr, :exitstatus
+    attr_writer :connection
 
     def initialize(options = {})
       @ip = options.fetch(:ip)
@@ -32,15 +33,14 @@ module Soloist
       end
     end
 
-    def connection
-      @connection ||= Net::SSH.start(ip, user, :keys => [key], :timeout => timeout)
-    end
-
     def upload(from, to, opts = "--exclude .git")
       Kernel.system("rsync -e 'ssh -i #{key}' -avz --delete #{from} #{user}@#{ip}:#{to} #{opts}")
     end
 
     private
+    def connection
+      @connection ||= Net::SSH.start(ip, user, :keys => [key], :timeout => timeout)
+    end
 
     def exec(command)
       connection.open_channel do |channel|
