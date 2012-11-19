@@ -3,6 +3,7 @@ require "tempfile"
 
 module Soloist
   class Config
+    attr_writer :solo_rb_path, :node_json_path
     attr_reader :royal_crown, :log_level
 
     def self.from_file(royal_crown_path, log_level = "info")
@@ -19,29 +20,33 @@ module Soloist
       "chef-solo -j '#{node_json.path}' -c '#{solo_rb.path}' -l '#{log_level}'"
     end
 
+    def as_solo_rb
+      "cookbook_path #{expanded_cookbook_directories.inspect}"
+    end
+
+    def as_node_json
+      compiled.node_attributes.to_hash.merge({ "recipes" => compiled.recipes })
+    end
+
+    def solo_rb_path
+      @solo_rb_path ||= Tempfile.new(["solo", ".rb"])
+    end
+
+    def node_json_path
+      @node_json_path ||= Tempfile.new(["node", ".json"])
+    end
+
     def solo_rb
-      @solo_rb ||= Tempfile.new(["solo", ".rb"]).tap do |file|
+      @solo_rb ||= solo_rb_path.tap do |file|
         puts content if debug?
         file.write(as_solo_rb)
       end
     end
 
     def node_json
-      @node_json ||= Tempfile.new(["node", ".json"]).tap do |file|
+      @node_json ||= node_json_path.tap do |file|
         puts JSON.pretty_generate(content) if debug?
         file.write(JSON.dump(as_node_json))
-      end
-    end
-
-    def compiled_rc
-      @compiled_rc ||= royal_crown.dup.tap do |rc|
-        while rc["env_variable_switches"]
-          rc.delete("env_variable_switches").each do |variable, switch|
-            switch.each do |value, inner|
-              rc.merge!(inner) if ENV[variable] == value
-            end
-          end
-        end
       end
     end
 
@@ -53,16 +58,20 @@ module Soloist
     end
 
     private
+    def compiled
+      @compiled ||= royal_crown.dup.tap do |rc|
+        while rc["env_variable_switches"]
+          rc.delete("env_variable_switches").each do |variable, switch|
+            switch.each do |value, inner|
+              rc.merge!(inner) if ENV[variable] == value
+            end
+          end
+        end
+      end
+    end
+
     def debug?
       log_level == "debug"
-    end
-
-    def as_solo_rb
-      "cookbook_path #{expanded_cookbook_directories.inspect}"
-    end
-
-    def as_node_json
-      { "recipes" => compiled_rc.recipes }
     end
 
     def expanded_cookbook_directories
@@ -74,7 +83,7 @@ module Soloist
     end
 
     def cookbook_paths
-      [royal_crown_cookbooks_directory] + compiled_rc.cookbook_paths
+      [royal_crown_cookbooks_directory] + compiled.cookbook_paths
     end
 
     def royal_crown_cookbooks_directory

@@ -75,52 +75,51 @@ describe Soloist::Config do
         node_json["recipes"].should include "waffles"
       end
     end
-  end
 
-  describe "#compiled_rc" do
-    let(:switch) { {"OX_TONGUES" => {"FINE" => {"recipes" => ["hobo_fist"]}}} }
-
-    before do
-      soloist_rc.env_variable_switches =  switch
-    end
-
-    context "when a switch is active" do
-      before { ENV.stub(:[]).and_return("FINE") }
-
-      it "merges the environment variable switch" do
-        config.compiled_rc.recipes.should include "hobo_fist"
+    context "with an environment switch" do
+      let(:nested) { {} }
+      let(:switch) do
+        {
+          "TONGUES" => {
+            "FINE" => {
+              "recipes" => ["hobo_fist"],
+              "env_variable_switches" => nested
+            }
+          }
+        }
       end
-    end
 
-    context "when a switch is inactive" do
-      before { ENV.stub(:[]).and_return("WHAT_NO_EW") }
+      before { config.royal_crown.env_variable_switches = switch }
 
-      it "outputs an empty list" do
-        config.compiled_rc.recipes.should be_empty
-      end
-    end
+      context "when the switch is inactive" do
+        before { ENV.stub(:[]).and_return("LOLWUT") }
 
-    context "when switches are nested" do
-      let(:inner) { {"GOAT" => {"TASTY" => {"node_attributes" => {"bbq" => "satan"}}}} }
-      let(:outer) { {"recipes" => ["stinkditch"], "env_variable_switches" => inner} }
-
-      before { ENV.stub(:[]).and_return("TASTY") }
-
-      context "when the inner switch is active" do
-        let(:switch) { {"HORSE" => {"TASTY" => outer }} }
-
-        it "evalutes all switches" do
-          config.compiled_rc.node_attributes.bbq.should == "satan"
-          config.compiled_rc.recipes.should == ["stinkditch"]
+        it "does not merge the attribute" do
+          node_json["recipes"].should be_empty
         end
       end
 
-      context "when the outer switch is inactive" do
-        let(:switch) { {"HORSE" => {"GROSS" => outer }} }
+      context "when a switch is active" do
+        before { ENV.stub(:[]).and_return("FINE") }
 
-        it "does not evaluate deeper" do
-          config.compiled_rc.recipes.should be_empty
-          config.compiled_rc.node_attributes.should be_empty
+        it "merges the attributes" do
+          node_json["recipes"].should =~ ["hobo_fist"]
+        end
+
+        context "when an inactive switch is nested" do
+          let(:nested) { {"BEANS" => {"EW" => {"recipes" => ["slammin"]}}} }
+
+          it "does not merge the attributes" do
+            node_json["recipes"].should =~ ["hobo_fist"]
+          end
+        end
+
+        context "when an active switch is nested" do
+          let(:nested) { {"BEANS" => {"FINE" => {"recipes" => ["slammin"]}}} }
+
+          it "merges the attributes" do
+            node_json["recipes"].should =~ ["slammin"]
+          end
         end
       end
     end
