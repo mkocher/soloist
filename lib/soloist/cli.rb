@@ -14,7 +14,7 @@ module Soloist
     def chef
       ensure_chef_cache_path
       install_cookbooks if cheffile_exists?
-      exec(conditional_sudo("bash -c '#{soloist_config.chef_solo}'"))
+      run_chef
     end
 
     desc "run_recipe", "Run individual recipes"
@@ -25,10 +25,14 @@ module Soloist
 
     desc "config", "Dumps configuration data for Soloist"
     def config
-      Kernel.ap(soloist_config.compiled_rc.to_hash)
+      Kernel.ap(soloist_config.as_node_json)
     end
 
     no_tasks do
+      def run_chef
+        exec(conditional_sudo("bash -c '#{soloist_config.chef_solo}'"))
+      end
+
       def ensure_chef_cache_path
         unless File.directory?("/var/chef/cache")
           system(conditional_sudo("mkdir -p /var/chef/cache"))

@@ -128,13 +128,13 @@ describe Soloist::CLI do
   end
 
   describe "#config" do
-    let(:royal_crown) { Soloist::RoyalCrown.new }
+    let(:royal_crown) { Soloist::RoyalCrown.new(:node_attributes => {"a" => "b"}) }
     let(:config) { Soloist::Config.new(royal_crown) }
 
     before { cli.stub(:soloist_config => config) }
 
     it "prints the hash render of the RoyalCrown" do
-      Kernel.should_receive(:ap).with({"recipes"=>[], "cookbook_paths"=>[], "node_attributes"=>{}})
+      Kernel.should_receive(:ap).with({"recipes"=>[], "a" => "b"})
       cli.config
     end
   end
