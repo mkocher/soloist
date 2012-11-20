@@ -1,23 +1,27 @@
 require "librarian/chef/cli"
+require "soloist/remote_config"
 require "soloist/known_hosts"
 require "soloist/spotlight"
-require "soloist/config"
-require "soloist/remote"
-require "thor"
 require "awesome_print"
+require "thor"
 
 module Soloist
   class CLI < Thor
+    attr_writer :soloist_config
     default_task :chef
 
     desc "chef", "Run chef-solo"
+    method_option :remote, :aliases => "-r", :desc => "Run chef-solo on user@host"
+    method_option :identity, :aliases => "-i", :desc => "The SSH identity file"
     def chef
-      ensure_chef_cache_path
+      soloist_config.ensure_chef_cache_path
       install_cookbooks if cheffile_exists?
-      run_chef
+      soloist_config.run_chef
     end
 
     desc "run_recipe", "Run individual recipes"
+    method_option :remote, :aliases => "-r", :desc => "Run recipes on user@host"
+    method_option :identity, :aliases => "-i", :desc => "The SSH identity file"
     def run_recipe(*recipes)
       soloist_config.royal_crown.recipes = recipes
       chef
@@ -29,16 +33,6 @@ module Soloist
     end
 
     no_tasks do
-      def run_chef
-        exec(conditional_sudo("bash -c '#{soloist_config.chef_solo}'"))
-      end
-
-      def ensure_chef_cache_path
-        unless File.directory?("/var/chef/cache")
-          system(conditional_sudo("mkdir -p /var/chef/cache"))
-        end
-      end
-
       def install_cookbooks
         Dir.chdir(File.dirname(rc_path)) do
           Librarian::Chef::Cli.with_environment do
@@ -48,27 +42,27 @@ module Soloist
       end
 
       def soloist_config
-        @soloist_config ||= begin
-          Soloist::Config.from_file(rc_path, log_level).tap do |config|
-            Soloist::Config.from_file(rc_local_path, log_level).tap do |local|
-              config.merge!(local)
-            end if rc_local_path
-          end
+        @soloist_config ||= if options[:remote]
+          Soloist::RemoteConfig.from_file(rc_path, remote)
+        else
+          Soloist::Config.from_file(rc_path)
+        end.tap do |config|
+          config.merge!(rc_local) if rc_local_path
         end
       end
     end
 
     private
-    def conditional_sudo(command)
-      root? ? command : "sudo -E #{command}"
+    def rc_local
+      Soloist::Config.from_file(rc_local_path)
     end
 
-    def root?
-      Process.uid == 0
-    end
-
-    def log_level
-      ENV["LOG_LEVEL"] || "info"
+    def remote
+      @remote ||= if options[:identity]
+        Soloist::Remote.from_uri(options[:remote], options[:identity])
+      else
+        Soloist::Remote.from_uri(options[:remote])
+      end
     end
 
     def cheffile_exists?

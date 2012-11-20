@@ -5,24 +5,15 @@ describe Soloist::Remote do
 
   subject do
     Soloist::Remote.new(
-      :ip => "ip",
-      :key => "key",
-      :user => "user",
+      "user",
+      "host",
+      "key",
       :stdout => "",
       :stderr => ""
     ).tap { |r| r.stub(:connection => connection) }
   end
 
   shared_examples "ssh exec" do |command|
-    def make_story_channel(&block)
-      story do |session|
-        channel = session.opens_channel
-        block.call(channel)
-        channel.gets_close
-        channel.sends_close
-      end
-    end
-
     context "when properly connected" do
       before do
         make_story_channel do |channel|
@@ -44,7 +35,8 @@ describe Soloist::Remote do
     context "when execution fails" do
       before do
         make_story_channel do |channel|
-          channel.sends_exec command, true, false
+          channel.sends_exec command,
+          true, false
         end
       end
 
@@ -114,8 +106,34 @@ describe Soloist::Remote do
 
   describe "#upload" do
     it "runs rsync with the specified arguments" do
-      Kernel.should_receive(:system).with("rsync -e 'ssh -i key' -avz --delete from user@ip:to opts")
+      Kernel.should_receive(:system).with("rsync -e 'ssh -i key' -avz --delete from user@host:to opts")
       subject.upload("from", "to", "opts")
+    end
+  end
+
+  describe ".from_uri" do
+    context "when a user is provided" do
+      subject { Soloist::Remote.from_uri("destructo@1.2.3.4") }
+
+      its(:user) { should == "destructo" }
+      its(:host) { should == "1.2.3.4" }
+    end
+
+    context "when a user is not provided" do
+      before { Etc.stub(:getlogin => "jim-bob") }
+
+      subject { Soloist::Remote.from_uri("1.2.3.4") }
+
+      its(:user) { should == "jim-bob" }
+      its(:host) { should == "1.2.3.4" }
+    end
+
+    context "when a key is provided" do
+      subject { Soloist::Remote.from_uri("splodey@1.2.3.4", "yo-some-key") }
+
+      its(:user) { should == "splodey" }
+      its(:host) { should == "1.2.3.4" }
+      its(:key) { should == "yo-some-key" }
     end
   end
 end

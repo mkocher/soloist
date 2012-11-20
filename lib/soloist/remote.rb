@@ -1,17 +1,23 @@
 require "net/ssh"
 require "shellwords"
+require "etc"
 
 module Soloist
   class RemoteError < RuntimeError; end
 
   class Remote
-    attr_reader :ip, :key, :user, :timeout, :stdout, :stderr, :exitstatus
+    attr_reader :user, :host, :key, :timeout, :stdout, :stderr, :exitstatus
     attr_writer :connection
 
-    def initialize(options = {})
-      @ip = options.fetch(:ip)
-      @key = options.fetch(:key)
-      @user = options.fetch(:user)
+    def self.from_uri(uri, key = "~/.ssh/id_rsa")
+      parsed = URI.parse("ssh://#{uri}")
+      new(parsed.user || Etc.getlogin, parsed.host, key)
+    end
+
+    def initialize(user, host, key, options = {})
+      @user = user
+      @host = host
+      @key = key
       @timeout = options[:timeout] || 10000
       @stdout = options[:stdout] || STDOUT
       @stderr = options[:stderr] || STDERR
@@ -34,12 +40,12 @@ module Soloist
     end
 
     def upload(from, to, opts = "--exclude .git")
-      Kernel.system("rsync -e 'ssh -i #{key}' -avz --delete #{from} #{user}@#{ip}:#{to} #{opts}")
+      Kernel.system("rsync -e 'ssh -i #{key}' -avz --delete #{from} #{user}@#{host}:#{to} #{opts}")
     end
 
     private
     def connection
-      @connection ||= Net::SSH.start(ip, user, :keys => [key], :timeout => timeout)
+      @connection ||= Net::SSH.start(host, user, :keys => [key], :timeout => timeout)
     end
 
     def exec(command)

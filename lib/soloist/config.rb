@@ -4,24 +4,33 @@ require "tempfile"
 module Soloist
   class Config
     attr_writer :solo_rb_path, :node_json_path
-    attr_reader :royal_crown, :log_level
+    attr_reader :royal_crown
 
-    def self.from_file(royal_crown_path, log_level = "info")
+    def self.from_file(royal_crown_path)
       rc = Soloist::RoyalCrown.from_file(royal_crown_path)
-      new(rc, log_level)
+      new(rc)
     end
 
-    def initialize(royal_crown, log_level = "info")
+    def initialize(royal_crown)
       @royal_crown = royal_crown
-      @log_level = log_level
+    end
+
+    def run_chef
+      exec(conditional_sudo("bash -c '#{chef_solo}'"))
+    end
+
+    def ensure_chef_cache_path
+      unless File.directory?("/var/chef/cache")
+        system(conditional_sudo("mkdir -p /var/chef/cache"))
+      end
     end
 
     def chef_solo
-      "chef-solo -j '#{node_json.path}' -c '#{solo_rb.path}' -l '#{log_level}'"
+      "chef-solo -j '#{node_json_path}' -c '#{solo_rb_path}' -l '#{log_level}'"
     end
 
     def as_solo_rb
-      "cookbook_path #{expanded_cookbook_directories.inspect}"
+      "cookbook_path #{cookbook_paths.inspect}"
     end
 
     def as_node_json
@@ -29,22 +38,14 @@ module Soloist
     end
 
     def solo_rb_path
-      @solo_rb_path ||= Tempfile.new(["solo", ".rb"])
-    end
-
-    def node_json_path
-      @node_json_path ||= Tempfile.new(["node", ".json"])
-    end
-
-    def solo_rb
-      @solo_rb ||= solo_rb_path.tap do |file|
+      @solo_rb_path ||= Tempfile.new(["solo", ".rb"]).tap do |file|
         puts content if debug?
         file.write(as_solo_rb)
       end
     end
 
-    def node_json
-      @node_json ||= node_json_path.tap do |file|
+    def node_json_path
+      @node_json_path ||= Tempfile.new(["node", ".json"]).tap do |file|
         puts JSON.pretty_generate(content) if debug?
         file.write(JSON.dump(as_node_json))
       end
@@ -58,6 +59,22 @@ module Soloist
     end
 
     private
+    def log_level
+      ENV["LOG_LEVEL"] || "info"
+    end
+
+    def debug?
+      log_level == "debug"
+    end
+
+    def conditional_sudo(command)
+      root? ? command : "sudo -E #{command}"
+    end
+
+    def root?
+      Process.uid == 0
+    end
+
     def compiled
       @compiled ||= royal_crown.dup.tap do |rc|
         while rc["env_variable_switches"]
@@ -70,20 +87,12 @@ module Soloist
       end
     end
 
-    def debug?
-      log_level == "debug"
-    end
-
-    def expanded_cookbook_directories
-      expanded_cookbook_paths.select { |path| File.directory?(path) }
-    end
-
-    def expanded_cookbook_paths
-      cookbook_paths.map { |path| File.expand_path(path, royal_crown_path) }.uniq
-    end
-
     def cookbook_paths
-      [royal_crown_cookbooks_directory] + compiled.cookbook_paths
+      ([royal_crown_cookbooks_directory] + compiled.cookbook_paths).map do |path|
+        File.expand_path(path, royal_crown_path)
+      end.uniq.select do |path|
+        File.directory?(path)
+      end
     end
 
     def royal_crown_cookbooks_directory
