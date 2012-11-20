@@ -58,6 +58,15 @@ module Soloist
       royal_crown.env_variable_switches.merge!(other.royal_crown.env_variable_switches)
     end
 
+    protected
+    def conditional_sudo(command)
+      root? ? command : "sudo -E #{command}"
+    end
+
+    def root?
+      Process.uid == 0
+    end
+
     private
     def log_level
       ENV["LOG_LEVEL"] || "info"
@@ -65,14 +74,6 @@ module Soloist
 
     def debug?
       log_level == "debug"
-    end
-
-    def conditional_sudo(command)
-      root? ? command : "sudo -E #{command}"
-    end
-
-    def root?
-      Process.uid == 0
     end
 
     def compiled
