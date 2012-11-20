@@ -5,14 +5,30 @@ describe Soloist::CLI do
   let(:base_path) { Dir.mktmpdir }
   let(:soloistrc_path) { File.expand_path("soloistrc", base_path) }
 
-  before { FileUtils.mkdir_p(base_path) }
+  before do
+    FileUtils.mkdir_p(base_path)
+    FileUtils.touch(soloistrc_path)
+    Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
+  end
 
   describe "#chef" do
+    it "receives the outside environment" do
+      ENV["AUTREYISM"] = "pathological-yodeling"
+      cli.soloist_config.should_receive(:exec) do |chef_solo|
+        `#{chef_solo}`.chomp.should == "pathological-yodeling"
+      end
+      cli.soloist_config.stub(:chef_solo).and_return('echo $AUTREYISM')
+      cli.chef
+    end
+
     context "when the soloistrc file does not exist" do
+      before { FileUtils.rm(soloistrc_path) }
+
       it "raises an error" do
+        cli.stub(:soloist_config) { Soloist::Spotlight.find!("soloistrc", ".soloistrc") }
         expect do
           begin
-            Dir.chdir(base_path) { cli.chef }
+            cli.chef
           rescue Soloist::NotFound => e
             e.message.should == "Could not find soloistrc or .soloistrc"
             raise
@@ -26,11 +42,12 @@ describe Soloist::CLI do
         File.open(soloistrc_path, "w") do |file|
           file.write(YAML.dump("recipes" => ["stinky::feet"]))
         end
+        cli.soloist_config = nil
+        Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
       end
 
       it "runs the proper recipes" do
-        cli.stub(:exec)
-        Dir.chdir(base_path) { cli.chef }
+        cli.chef
         cli.soloist_config.royal_crown.recipes.should =~ ["stinky::feet"]
       end
 
@@ -41,49 +58,46 @@ describe Soloist::CLI do
           File.open(soloistrc_local_path, "w") do |file|
             file.write(YAML.dump("recipes" => ["stinky::socks"]))
           end
+          cli.soloist_config = nil
+          Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
         end
 
         it "installs the proper recipes" do
-          cli.stub(:exec)
-          Dir.chdir(base_path) { cli.chef }
+          cli.chef
           cli.soloist_config.royal_crown.recipes.should =~ ["stinky::feet", "stinky::socks"]
         end
       end
 
       context "when the Cheffile does not exist" do
         it "runs chef" do
-          cli.should_receive(:exec)
-          Dir.chdir(base_path) { cli.chef }
+          cli.soloist_config.should_receive(:exec)
+          cli.chef
         end
 
         it "does not run librarian" do
-          cli.stub(:exec)
           Librarian::Chef::Cli.should_not_receive(:with_environment)
-          Dir.chdir(base_path) { cli.chef }
+          cli.chef
         end
       end
 
       context "when the Cheffile exists" do
         let(:cli_instance) { double(:cli_instance) }
 
-        before do
-          FileUtils.touch(File.expand_path("Cheffile", base_path))
-          cli.stub(:exec)
-        end
+        before { FileUtils.touch(File.expand_path("Cheffile", base_path)) }
 
         it "runs librarian" do
           Librarian::Chef::Cli.should_receive(:with_environment).and_yield
           Librarian::Chef::Cli.should_receive(:new).and_return(cli_instance)
           cli_instance.should_receive(:install)
-          Dir.chdir(base_path) { cli.chef }
+          cli.chef
         end
 
         context "when the user is not root" do
           it "creates the cache path using sudo" do
-            cli.should_receive(:exec) do |command|
+            cli.soloist_config.should_receive(:exec) do |command|
               command.should =~ /^sudo -E/
             end
-            Dir.chdir(base_path) { cli.chef }
+            cli.chef
           end
         end
 
@@ -91,10 +105,10 @@ describe Soloist::CLI do
           before { Process.stub(:uid => 0) }
 
           it "creates the cache path" do
-            cli.should_receive(:exec) do |command|
+            cli.soloist_config.should_receive(:exec) do |command|
               command.should_not =~ /^sudo -E/
             end
-            Dir.chdir(base_path) { cli.chef }
+            cli.chef
           end
         end
       end
@@ -103,9 +117,12 @@ describe Soloist::CLI do
 
   describe "#run_recipe" do
     context "when the soloistrc does not exist" do
+      before { FileUtils.rm(soloistrc_path) }
+
       it "raises an error" do
+        cli.stub(:soloist_config) { Soloist::Spotlight.find!("soloistrc", ".soloistrc") }
         expect do
-          Dir.chdir(base_path) { cli.run_recipe("pineapple::wut") }
+          cli.run_recipe("pineapple::wut")
         end.to raise_error(Soloist::NotFound)
       end
     end
@@ -118,11 +135,9 @@ describe Soloist::CLI do
       end
 
       it "sets a recipe to run" do
-        Dir.chdir(base_path) do
-          cli.should_receive(:chef)
-          cli.run_recipe("angst::teenage", "ennui::default")
-          cli.soloist_config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
-        end
+        cli.should_receive(:chef)
+        cli.run_recipe("angst::teenage", "ennui::default")
+        cli.soloist_config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
       end
     end
   end
@@ -145,8 +160,8 @@ describe Soloist::CLI do
 
       context "when the user is not root" do
         it "creates the cache path using sudo" do
-          cli.should_receive(:system).with("sudo -E mkdir -p /var/chef/cache")
-          cli.ensure_chef_cache_path
+          cli.soloist_config.should_receive(:system).with("sudo -E mkdir -p /var/chef/cache")
+          cli.soloist_config.ensure_chef_cache_path
         end
       end
 
@@ -154,8 +169,8 @@ describe Soloist::CLI do
         before { Process.stub(:uid => 0) }
 
         it "creates the cache path using sudo" do
-          cli.should_receive(:system).with("mkdir -p /var/chef/cache")
-          cli.ensure_chef_cache_path
+          cli.soloist_config.should_receive(:system).with("mkdir -p /var/chef/cache")
+          cli.soloist_config.ensure_chef_cache_path
         end
       end
     end
@@ -164,25 +179,8 @@ describe Soloist::CLI do
       before { File.stub(:directory? => true) }
 
       it "does not create the cache path" do
-        cli.should_not_receive(:system)
-        cli.ensure_chef_cache_path
-      end
-    end
-  end
-
-  describe "#chef" do
-    before do
-      ENV["AUTREYISM"] = "pathological-yodeling"
-      FileUtils.touch(File.expand_path("soloistrc", base_path))
-    end
-
-    it "receives the outside environment" do
-      cli.should_receive(:exec) do |chef_solo|
-        `#{chef_solo}`.chomp.should == "pathological-yodeling"
-      end
-      Dir.chdir(base_path) do
-        cli.soloist_config.stub(:chef_solo).and_return('echo $AUTREYISM')
-        cli.chef
+        cli.soloist_config.should_not_receive(:system)
+        cli.soloist_config.ensure_chef_cache_path
       end
     end
   end
