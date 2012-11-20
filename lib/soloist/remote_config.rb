@@ -16,23 +16,38 @@ module Soloist
     end
 
     def run_chef
-      remote.system!(chef_solo)
+      remote.system!("#{export_environment} && #{conditional_sudo(chef_solo)}")
+    end
+
+    def export_environment
+      ENV.map{ |k, v| "export #{k}=#{v}" }.join(" && ")
     end
 
     def node_json_path
       @node_json_path ||= remote.backtick("mktemp -t node.json").tap do |path|
-        remote.system!("echo '#{as_node_json}' | tee #{path} > /dev/null")
+        tee = conditional_sudo("tee #{path}")
+        remote.system!("echo '#{as_node_json}' | #{tee} > /dev/null")
       end
     end
 
     def solo_rb_path
       @solo_rb_path ||= remote.backtick("mktemp -t solo.rb").tap do |path|
-        remote.system!("echo '#{as_solo_rb}' | tee #{path}")
+        tee = conditional_sudo("tee #{path}")
+        remote.system!("echo '#{as_solo_rb}' | #{tee} > /dev/null")
       end
     end
 
     def ensure_chef_path
-      remote.system!("mkdir -p /var/chef/cache")
+      remote.system!(conditional_sudo("mkdir -p /var/chef/cache"))
+    end
+
+    protected
+    def conditional_sudo(command)
+      root? ? command : "sudo -E #{command}"
+    end
+
+    def root?
+      remote.user == "root"
     end
   end
 end

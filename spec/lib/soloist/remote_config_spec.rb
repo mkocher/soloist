@@ -31,7 +31,7 @@ describe Soloist::RemoteConfig do
     end
 
     it "dumps cookbook paths into the remote file" do
-      remote.should_receive(:system!).with("echo 'cookbook_path []' | tee /tmp/bummer")
+      remote.should_receive(:system!).with("echo 'cookbook_path []' | sudo -E tee /tmp/bummer > /dev/null")
       remote_config.solo_rb_path.should == "/tmp/bummer"
     end
   end
@@ -50,14 +50,14 @@ describe Soloist::RemoteConfig do
     end
 
     it "dumps cookbook paths into the remote file" do
-      remote.should_receive(:system!).with("echo '{\"recipes\"=>[]}' | tee /tmp/wat > /dev/null")
+      remote.should_receive(:system!).with("echo '{\"recipes\"=>[]}' | sudo -E tee /tmp/wat > /dev/null")
       remote_config.node_json_path.should == "/tmp/wat"
     end
   end
 
   describe "#ensure_chef_path" do
     it "makes a directory remotely" do
-      make_story_channel { |ch| ch.sends_exec 'mkdir\ -p\ /var/chef/cache' }
+      make_story_channel { |ch| ch.sends_exec 'sudo\ -E\ mkdir\ -p\ /var/chef/cache' }
       remote_config.ensure_chef_path
     end
   end
