@@ -17,7 +17,7 @@ module Soloist
       exec(conditional_sudo("bash -c '#{chef_solo}'"))
     end
 
-    desc "run_recipe", "Runs an individual recipe with chef-solo"
+    desc "DO_IT_LIVE [cookbook::recipe]", "Runs an individual recipe with chef-solo"
     def DO_IT_LIVE(*recipes)
       config.royal_crown.recipes = recipes
       chef
