@@ -50,7 +50,7 @@ describe Soloist::RemoteConfig do
     end
 
     it "dumps cookbook paths into the remote file" do
-      remote.should_receive(:system!).with("echo '{\"recipes\"=>[]}' | sudo -E tee /tmp/wat > /dev/null")
+      remote.should_receive(:system!).with("echo '{\"recipes\":[]}' | sudo -E tee /tmp/wat > /dev/null")
       remote_config.node_json_path.should == "/tmp/wat"
     end
   end

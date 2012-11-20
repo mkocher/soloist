@@ -26,7 +26,7 @@ module Soloist
     def node_json_path
       @node_json_path ||= remote.backtick("mktemp -t node.json").tap do |path|
         tee = conditional_sudo("tee #{path}")
-        remote.system!("echo '#{as_node_json}' | #{tee} > /dev/null")
+        remote.system!("echo '#{JSON.dump(as_node_json)}' | #{tee} > /dev/null")
       end
     end
 
