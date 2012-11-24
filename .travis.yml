@@ -9,5 +9,5 @@ rvm:
   - ree
 script: script/ci.sh
 env:
-  global:
+  jruby:
     - JRUBY_OPTS="-Xcext.enabled=true"
