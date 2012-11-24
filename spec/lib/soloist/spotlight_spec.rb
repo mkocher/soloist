@@ -1,8 +1,7 @@
 require "spec_helper"
 
 describe Soloist::Spotlight do
-  let(:tempdir) { Dir.mktmpdir }
-  let(:shallow_path) { File.expand_path("beans/roger", tempdir) }
+  let(:shallow_path) { File.expand_path("beans/roger", RSpec.configuration.tempdir) }
   let(:spotlight) { Soloist::Spotlight.new(shallow_path) }
 
   before { FileUtils.mkdir_p(shallow_path) }
@@ -49,7 +48,7 @@ describe Soloist::Spotlight do
       before { FileUtils.touch(file_path) }
 
       it "finds a soloistrc in the current directory" do
-        spotlight.find("soloistrc").to_s.should == tempdir + "/beans/roger/soloistrc"
+        spotlight.find("soloistrc").to_s.should =~ /\/beans\/roger\/soloistrc$/
       end
 
       context "inside a deeper directory" do

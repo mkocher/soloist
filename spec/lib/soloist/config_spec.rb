@@ -1,12 +1,11 @@
 require "spec_helper"
 
 describe Soloist::Config do
-  let(:tempdir) { Dir.mktmpdir("soloist-config") }
-  let(:soloist_rc_path) { File.expand_path("soloistrc", tempdir) }
+  let(:soloist_rc_path) { File.expand_path("soloistrc", RSpec.configuration.tempdir) }
   let(:soloist_rc) { Soloist::RoyalCrown.new(:path => soloist_rc_path) }
   let(:config) { Soloist::Config.new(soloist_rc) }
-  let(:cookbook_path) { File.expand_path("cookbooks", tempdir) }
-  let(:nested_cookbook_path) { File.expand_path("whoa/cookbooks", tempdir) }
+  let(:cookbook_path) { File.expand_path("cookbooks", RSpec.configuration.tempdir) }
+  let(:nested_cookbook_path) { File.expand_path("whoa/cookbooks", RSpec.configuration.tempdir) }
 
   describe "#as_solo_rb" do
     subject { config.as_solo_rb }
