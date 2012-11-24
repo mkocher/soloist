@@ -1,8 +1,7 @@
 require "spec_helper"
 
 describe Soloist::RemoteConfig do
-  let(:tempdir) { Dir.mktmpdir("remote-config") }
-  let(:royal_crown_path) { File.expand_path("soloistrc", tempdir) }
+  let(:royal_crown_path) { File.expand_path("soloistrc", RSpec.configuration.tempdir) }
   let(:royal_crown) { Soloist::RoyalCrown.new(:path => royal_crown_path) }
   let(:remote) { Soloist::Remote.new("user", "host", "key") }
   let(:remote_config) { Soloist::RemoteConfig.new(royal_crown, remote) }
