@@ -8,3 +8,6 @@ rvm:
 #  - ruby-head
   - ree
 script: script/ci.sh
+env:
+  global:
+    - JRUBY_OPTS="-Xcext.enabled=true"
