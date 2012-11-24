@@ -49,6 +49,8 @@ GEM
     guard-rspec (2.1.2)
       guard (>= 1.1)
       rspec (~> 2.11)
+    guard-shell (0.5.1)
+      guard (>= 1.1.0)
     hashie (1.2.0)
     highline (1.6.15)
     ipaddress (0.8.0)
@@ -61,7 +63,7 @@ GEM
       chef (>= 0.10)
       highline
       thor (~> 0.15)
-    listen (0.5.3)
+    listen (0.6.0)
     lumberjack (1.0.2)
     method_source (0.8.1)
     mime-types (1.19)
@@ -125,6 +127,7 @@ DEPENDENCIES
   godot
   guard-bundler
   guard-rspec
+  guard-shell
   jruby-openssl
   rb-fsevent
   rspec

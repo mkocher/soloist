@@ -11,19 +11,28 @@ describe Soloist::Config do
   describe "#as_solo_rb" do
     subject { config.as_solo_rb }
 
+    it { should include 'file_cache_path "/var/chef/cache"' }
+    it { should include %(json_attribs "#{config.node_json_path}") }
+  end
+
+  describe "#cookbook_paths" do
+    subject { config.cookbook_paths }
+
     context "when the default cookbook path does not exist" do
-      it { should == 'cookbook_path []' }
+      it { should have(0).paths }
     end
 
     context "when the default cookbook path exists" do
       before { FileUtils.mkdir_p(cookbook_path) }
 
-      it { should == %(cookbook_path ["#{cookbook_path}"]) }
+      it { should have(1).path }
+      it { should =~ [cookbook_path] }
 
       context "when the default cookbook path is specified" do
         before { soloist_rc.cookbook_paths = [cookbook_path] }
 
-        it { should == %(cookbook_path ["#{cookbook_path}"]) }
+        it { should have(1).path }
+        it { should =~ [cookbook_path] }
       end
 
       context "with a specified cookbook path" do
@@ -32,17 +41,20 @@ describe Soloist::Config do
         context "when the specified path exists" do
           before { FileUtils.mkdir_p(nested_cookbook_path) }
 
-          it { should == %(cookbook_path ["#{cookbook_path}", "#{nested_cookbook_path}"]) }
+          it { should have(2).paths }
+          it { should =~ [cookbook_path, nested_cookbook_path] }
 
           context "with duplicate cookbook paths" do
             before { soloist_rc.cookbook_paths = [nested_cookbook_path, nested_cookbook_path] }
 
-            it { should == %(cookbook_path ["#{cookbook_path}", "#{nested_cookbook_path}"]) }
+            it { should have(2).paths }
+            it { should =~ [cookbook_path, nested_cookbook_path] }
           end
         end
 
         context "when the specified path does not exist" do
-          it { should == %(cookbook_path ["#{cookbook_path}"]) }
+          it { should have(1).path }
+          it { should =~ [cookbook_path] }
         end
       end
     end
@@ -53,7 +65,8 @@ describe Soloist::Config do
         FileUtils.mkdir_p(nested_cookbook_path)
       end
 
-      it { should == %(cookbook_path ["#{nested_cookbook_path}"]) }
+      it { should have(1).path }
+      it { should =~ [nested_cookbook_path] }
     end
 
     context "with unixisms in the cookbook path" do
@@ -61,65 +74,78 @@ describe Soloist::Config do
 
       before { soloist_rc.cookbook_paths = ["~"] }
 
-      it { should == %(cookbook_path ["#{home}"]) }
+      it { should have(1).path }
+      it { should =~ [home] }
     end
   end
 
   describe "#as_node_json" do
-    let(:node_json) { config.as_node_json }
+    let(:soloist_rc) do
+      Soloist::RoyalCrown.new(
+        :path => soloist_rc_path,
+        :recipes => ["waffles"],
+        :node_attributes => { "gargling" => "cool", "birds" => {"nested" => "cheep"} }
+      )
+    end
 
-    context "with recipes" do
-      before { soloist_rc.recipes = ["waffles"] }
+    describe "node_attributes" do
+      subject { config.as_node_json }
 
-      it "can generate json" do
-        node_json["recipes"].should include "waffles"
+      it { should include "gargling" => "cool" }
+      it { should include "birds" => { "nested" => "cheep" } }
+    end
+
+    describe "recipes" do
+      subject { config.as_node_json["recipes"] }
+
+      it { should have(1).recipe }
+      it { should =~ ["waffles"] }
+    end
+  end
+
+  describe "#compiled" do
+    let(:nested) { {} }
+    let(:switch) do
+      {
+        "TONGUES" => {
+          "FINE" => {
+            "recipes" => ["hobo_fist"],
+            "env_variable_switches" => nested
+          }
+        }
+      }
+    end
+
+    before { config.royal_crown.env_variable_switches = switch }
+
+    context "when the switch is inactive" do
+      before { ENV.stub(:[]).and_return("LOLWUT") }
+
+      it "does not merge the attribute" do
+        config.compiled["recipes"].should be_empty
       end
     end
 
-    context "with an environment switch" do
-      let(:nested) { {} }
-      let(:switch) do
-        {
-          "TONGUES" => {
-            "FINE" => {
-              "recipes" => ["hobo_fist"],
-              "env_variable_switches" => nested
-            }
-          }
-        }
+    context "when a switch is active" do
+      before { ENV.stub(:[]).and_return("FINE") }
+
+      it "merges the attributes" do
+        config.compiled.recipes.should =~ ["hobo_fist"]
       end
 
-      before { config.royal_crown.env_variable_switches = switch }
+      context "when an inactive switch is nested" do
+        let(:nested) { {"BEANS" => {"EW" => {"recipes" => ["slammin"]}}} }
 
-      context "when the switch is inactive" do
-        before { ENV.stub(:[]).and_return("LOLWUT") }
-
-        it "does not merge the attribute" do
-          node_json["recipes"].should be_empty
+        it "does not merge the attributes" do
+          config.compiled.recipes.should =~ ["hobo_fist"]
         end
       end
 
-      context "when a switch is active" do
-        before { ENV.stub(:[]).and_return("FINE") }
+      context "when an active switch is nested" do
+        let(:nested) { {"BEANS" => {"FINE" => {"recipes" => ["slammin"]}}} }
 
         it "merges the attributes" do
-          node_json["recipes"].should =~ ["hobo_fist"]
-        end
-
-        context "when an inactive switch is nested" do
-          let(:nested) { {"BEANS" => {"EW" => {"recipes" => ["slammin"]}}} }
-
-          it "does not merge the attributes" do
-            node_json["recipes"].should =~ ["hobo_fist"]
-          end
-        end
-
-        context "when an active switch is nested" do
-          let(:nested) { {"BEANS" => {"FINE" => {"recipes" => ["slammin"]}}} }
-
-          it "merges the attributes" do
-            node_json["recipes"].should =~ ["slammin"]
-          end
+          config.compiled.recipes.should =~ ["slammin"]
         end
       end
     end
@@ -140,6 +166,32 @@ describe Soloist::Config do
       config.merge!(other_config)
       other_config.royal_crown.recipes.should =~ ["chum"]
       other_config.royal_crown.node_attributes.should == {:tasty => "maybe"}
+    end
+  end
+
+  describe "#log_level" do
+    subject { config.log_level }
+
+    context "when LOG_LEVEL is not set" do
+      it { should == "info" }
+    end
+
+    context "when LOG_LEVEL is set" do
+      before { ENV.stub(:[] => "BEANS") }
+      it { should == "BEANS" }
+    end
+  end
+
+  describe "#debug?" do
+    subject { config.debug? }
+
+    context "when log_level is not debug" do
+      it { should_not be }
+    end
+
+    context "when log_level is debug" do
+      before { config.stub(:log_level => "debug") }
+      it { should be }
     end
   end
 end

@@ -14,12 +14,11 @@ module Soloist
     method_option :remote, :aliases => "-r", :desc => "Run chef-solo on user@host"
     method_option :identity, :aliases => "-i", :desc => "The SSH identity file"
     def chef
-      soloist_config.ensure_chef_cache_path
       install_cookbooks if cheffile_exists?
       soloist_config.run_chef
     end
 
-    desc "run_recipe [cookbook::recipe]", "Run individual recipes"
+    desc "run_recipe [cookbook::recipe, ...]", "Run individual recipes"
     method_option :remote, :aliases => "-r", :desc => "Run recipes on user@host"
     method_option :identity, :aliases => "-i", :desc => "The SSH identity file"
     def run_recipe(*recipes)

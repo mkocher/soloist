@@ -3,17 +3,15 @@ require "spec_helper"
 describe Soloist::Remote do
   include Net::SSH::Test
 
-  subject do
-    Soloist::Remote.new(
-      "user",
-      "host",
-      "key",
-      :stdout => "",
-      :stderr => ""
-    ).tap { |r| r.stub(:connection => connection) }
-  end
+  subject { Soloist::Remote.new("user", "host", "key") }
+
+  before { subject.connection = connection }
 
   shared_examples "ssh exec" do |command|
+    let(:stdio) { double(:stdio, :<< => nil) }
+
+    before { subject.stub(:stdout => stdio, :stderr => stdio) }
+
     context "when properly connected" do
       before do
         make_story_channel do |channel|
@@ -23,8 +21,8 @@ describe Soloist::Remote do
       end
 
       it "returns standard output" do
-        expect { described_function }.to change { subject.stdout.dup }
-        subject.stdout.should == "endless bummer"
+        stdio.should_receive(:<<).with("endless bummer")
+        described_function
       end
 
       it "sets the exit status" do
@@ -52,6 +50,7 @@ describe Soloist::Remote do
           channel.gets_extended_data "yodawg i put an error in your error"
           channel.gets_exit_status(127)
         end
+        subject.stub(:stderr => stdio)
       end
 
       it "returns the exit status" do
@@ -59,8 +58,8 @@ describe Soloist::Remote do
       end
 
       it "sends output to stderr" do
-        expect { described_function }.to change { subject.stderr.dup }
-        subject.stderr.should == "yodawg i put an error in your error"
+        subject.stderr.should_receive(:<<).with("yodawg i put an error in your error")
+        described_function
       end
     end
   end
@@ -70,8 +69,9 @@ describe Soloist::Remote do
     it_behaves_like "ssh exec", "not-a-japanese-band"
 
     it "returns stdout" do
-      subject.stdout << "wut"
-      subject.should_receive(:exec)
+      subject.should_receive(:exec) do
+        subject.stdout << "wut"
+      end
       described_function.should == "wut"
     end
   end
@@ -120,19 +120,15 @@ describe Soloist::Remote do
     end
 
     context "when a user is not provided" do
-      before { Etc.stub(:getlogin => "jim-bob") }
-
-      subject { Soloist::Remote.from_uri("1.2.3.4") }
-
-      its(:user) { should == "jim-bob" }
-      its(:host) { should == "1.2.3.4" }
+      it "sets the correct user" do
+        Etc.should_receive(:getlogin).and_return("jim-bob")
+        Soloist::Remote.from_uri("1.2.3.4").user.should == "jim-bob"
+      end
     end
 
     context "when a key is provided" do
-      subject { Soloist::Remote.from_uri("splodey@1.2.3.4", "yo-some-key") }
+      subject { Soloist::Remote.from_uri("dude@whatever", "yo-some-key") }
 
-      its(:user) { should == "splodey" }
-      its(:host) { should == "1.2.3.4" }
       its(:key) { should == "yo-some-key" }
     end
   end

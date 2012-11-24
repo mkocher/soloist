@@ -16,34 +16,43 @@ module Soloist
     end
 
     def run_chef
-      remote.system!("#{export_environment} && #{conditional_sudo(chef_solo)}")
-    end
-
-    def export_environment
-      ENV.map{ |k, v| "export #{k}=#{v}" }.join(" && ")
+      remote.system!(conditional_sudo(%(/bin/bash -lc "#{chef_solo}")))
     end
 
     def node_json_path
-      @node_json_path ||= remote.backtick("mktemp -t node.json").tap do |path|
-        tee = conditional_sudo("tee #{path}")
-        remote.system!("echo '#{JSON.dump(as_node_json)}' | #{tee} > /dev/null")
+      @node_json_path ||= File.expand_path("node.json", chef_config_path).tap do |path|
+        remote.system!(%(echo '#{JSON.dump(as_node_json)}' | #{conditional_sudo("tee #{path}")}))
       end
     end
 
     def solo_rb_path
-      @solo_rb_path ||= remote.backtick("mktemp -t solo.rb").tap do |path|
-        tee = conditional_sudo("tee #{path}")
-        remote.system!("echo '#{as_solo_rb}' | #{tee} > /dev/null")
+      @solo_rb_path ||= File.expand_path("solo.rb", chef_config_path).tap do |path|
+        remote.system!(%(echo '#{as_solo_rb}' | #{conditional_sudo("tee #{path}")}))
       end
     end
 
-    def ensure_chef_path
-      remote.system!(conditional_sudo("mkdir -p /var/chef/cache"))
+    def chef_cache_path
+      @chef_cache_path ||= "/var/chef/cache".tap do |cache_path|
+        remote.system!(conditional_sudo("/bin/mkdir -m 777 -p #{cache_path}"))
+      end
+    end
+
+    def chef_config_path
+      @chef_config_path ||= "/etc/chef".tap do |path|
+        remote.system!(conditional_sudo("/bin/mkdir -m 777 -p #{path}"))
+      end
+    end
+
+    def cookbook_paths
+      @cookbook_paths ||= ["/var/chef/cookbooks".tap do |remote_path|
+        remote.system!(conditional_sudo("/bin/mkdir -m 777 -p #{remote_path}"))
+        super.each { |path| remote.upload("#{path}/", remote_path) }
+      end]
     end
 
     protected
     def conditional_sudo(command)
-      root? ? command : "sudo -E #{command}"
+      root? ? command : "/usr/bin/sudo -E #{command}"
     end
 
     def root?
