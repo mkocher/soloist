@@ -7,8 +7,8 @@ describe Soloist::CLI do
 
   before do
     FileUtils.mkdir_p(base_path)
-    FileUtils.touch(soloistrc_path)
-    Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
+    # FileUtils.touch(soloistrc_path)
+    # Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
   end
 
   describe "#chef" do
@@ -22,13 +22,10 @@ describe Soloist::CLI do
     end
 
     context "when the soloistrc file does not exist" do
-      before { FileUtils.rm(soloistrc_path) }
-
       it "raises an error" do
-        cli.stub(:soloist_config) { Soloist::Spotlight.find!("soloistrc", ".soloistrc") }
         expect do
           begin
-            cli.chef
+            Dir.chdir(base_path) { cli.chef }
           rescue Soloist::NotFound => e
             e.message.should == "Could not find soloistrc or .soloistrc"
             raise
@@ -117,12 +114,9 @@ describe Soloist::CLI do
 
   describe "#run_recipe" do
     context "when the soloistrc does not exist" do
-      before { FileUtils.rm(soloistrc_path) }
-
       it "raises an error" do
-        cli.stub(:soloist_config) { Soloist::Spotlight.find!("soloistrc", ".soloistrc") }
         expect do
-          cli.run_recipe("pineapple::wut")
+          Dir.chdir(base_path) { cli.run_recipe("pineapple::wut") }
         end.to raise_error(Soloist::NotFound)
       end
     end
@@ -151,37 +145,6 @@ describe Soloist::CLI do
     it "prints the hash render of the RoyalCrown" do
       Kernel.should_receive(:ap).with({"recipes"=>[], "a" => "b"})
       cli.config
-    end
-  end
-
-  describe "#ensure_chef_cache_path" do
-    context "when the cache path does not exist" do
-      before { File.stub(:directory? => false) }
-
-      context "when the user is not root" do
-        it "creates the cache path using sudo" do
-          cli.soloist_config.should_receive(:system).with("sudo -E mkdir -p /var/chef/cache")
-          cli.soloist_config.ensure_chef_cache_path
-        end
-      end
-
-      context "when the user is root" do
-        before { Process.stub(:uid => 0) }
-
-        it "creates the cache path using sudo" do
-          cli.soloist_config.should_receive(:system).with("mkdir -p /var/chef/cache")
-          cli.soloist_config.ensure_chef_cache_path
-        end
-      end
-    end
-
-    context "when the cache path exists" do
-      before { File.stub(:directory? => true) }
-
-      it "does not create the cache path" do
-        cli.soloist_config.should_not_receive(:system)
-        cli.soloist_config.ensure_chef_cache_path
-      end
     end
   end
 end

@@ -10,3 +10,8 @@ guard 'bundler' do
   watch('Gemfile')
   watch('soloist.gemspec')
 end
+
+guard 'shell' do
+  watch('Vagrantfile') { system("unset RUBYOPT; vagrant provision") }
+  watch('script/bootstrap.sh') { system("unset RUBYOPT; vagrant provision") }
+end

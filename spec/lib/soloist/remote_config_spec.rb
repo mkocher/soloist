@@ -1,64 +1,85 @@
 require "spec_helper"
 
 describe Soloist::RemoteConfig do
-  include Net::SSH::Test
-
   let(:tempdir) { Dir.mktmpdir("remote-config") }
   let(:royal_crown_path) { File.expand_path("soloistrc", tempdir) }
   let(:royal_crown) { Soloist::RoyalCrown.new(:path => royal_crown_path) }
-  let(:remote) do
-    Soloist::Remote.new(
-      "user",
-      "host",
-      "key",
-      :stdout => "",
-      :stderr => ""
-    ).tap { |r| r.stub(:connection => connection) }
-  end
+  let(:remote) { Soloist::Remote.new("user", "host", "key") }
   let(:remote_config) { Soloist::RemoteConfig.new(royal_crown, remote) }
 
+  before { remote.stub(:backtick => "", :system => 0) }
+
+  def commands_for(method)
+    [].tap do |commands|
+      remote.stub(:system) { |c| commands << c; 0 }
+      remote.stub(:backtick) { |c| commands << c; "" }
+      remote_config.send(method)
+    end
+  end
+
+  describe "#run_chef" do
+    it "runs chef" do
+      commands_for(:run_chef).last.should include "chef-solo"
+    end
+  end
+
   describe "#solo_rb_path" do
-    before do
-      make_story_channel do |channel|
-        channel.sends_exec 'mktemp\ -t\ solo.rb'
-        channel.gets_data "/tmp/bummer"
-      end
+    it "sets the path to /etc/chef/solo.rb" do
+      remote_config.solo_rb_path.should == "/etc/chef/solo.rb"
     end
 
-    it "creates a file remotely" do
-      remote.should_receive(:system!)
-      remote_config.solo_rb_path.should == "/tmp/bummer"
-    end
-
-    it "dumps cookbook paths into the remote file" do
-      remote.should_receive(:system!).with("echo 'cookbook_path []' | sudo -E tee /tmp/bummer > /dev/null")
-      remote_config.solo_rb_path.should == "/tmp/bummer"
+    it "sets up solo.rb remotely" do
+      commands_for(:solo_rb_path).last.should =~ /sudo -E tee \/etc\/chef\/solo\.rb$/
     end
   end
 
   describe "#node_json_path" do
-    before do
-      make_story_channel do |channel|
-        channel.sends_exec 'mktemp\ -t\ node.json'
-        channel.gets_data "/tmp/wat"
-      end
+    it "sets the path" do
+      remote_config.node_json_path.should == "/etc/chef/node.json"
     end
 
-    it "creates a file remotely" do
-      remote.should_receive(:system!)
-      remote_config.node_json_path.should == "/tmp/wat"
-    end
-
-    it "dumps cookbook paths into the remote file" do
-      remote.should_receive(:system!).with("echo '{\"recipes\":[]}' | sudo -E tee /tmp/wat > /dev/null")
-      remote_config.node_json_path.should == "/tmp/wat"
+    it "sets up node.json remotely" do
+      commands_for(:node_json_path).last.should =~ /sudo -E tee \/etc\/chef\/node\.json$/
     end
   end
 
-  describe "#ensure_chef_path" do
-    it "makes a directory remotely" do
-      make_story_channel { |ch| ch.sends_exec 'sudo\ -E\ mkdir\ -p\ /var/chef/cache' }
-      remote_config.ensure_chef_path
+  describe "#chef_config_path" do
+    it "sets the path" do
+      remote_config.chef_config_path.should == "/etc/chef"
+    end
+
+    it "creates the path remotely" do
+      commands_for(:chef_config_path).tap do |commands|
+        commands.should have(1).command
+        commands.first.should =~ /mkdir .*? -p \/etc\/chef$/
+      end
+    end
+  end
+
+  describe "#chef_cache_path" do
+    it "sets the path" do
+      remote_config.chef_cache_path.should == "/var/chef/cache"
+    end
+
+    it "creates the path remotely" do
+      commands_for(:chef_cache_path).tap do |commands|
+        commands.should have(1).command
+        commands.first.should =~ /mkdir .*? -p \/var\/chef\/cache$/
+      end
+    end
+  end
+
+  describe "#cookbook_paths" do
+    it "sets the path" do
+      remote_config.cookbook_paths.should have(1).path
+      remote_config.cookbook_paths.should =~ ["/var/chef/cookbooks"]
+    end
+
+    it "creates the path remotely" do
+      commands_for(:cookbook_paths).tap do |commands|
+        commands.should have(1).command
+        commands.first.should =~ /mkdir .*? -p \/var\/chef\/cookbooks$/
+      end
     end
   end
 end

@@ -1,0 +1,9 @@
+cookbook_paths:
+- ~/cookbooks
+recipes:
+- pivotal_workstation::meta_osx_base
+#- pivotal_workstation::meta_osx_development
+#- pivotal_workstation::meta_ruby_development
+#- pivotal_workstation::meta_pivotal_specifics
+#- pivotal_workstation_private::meta_lion_image
+- pivotal_workstation::sublime_text

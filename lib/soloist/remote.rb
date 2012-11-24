@@ -19,23 +19,25 @@ module Soloist
       @host = host
       @key = key
       @timeout = options[:timeout] || 10000
-      @stdout = options[:stdout] || STDOUT
-      @stderr = options[:stderr] || STDERR
     end
 
     def backtick(command)
-      exec(Shellwords.escape(command))
-      stdout
+      @stdout = ""
+      @stderr = ""
+      exec(command)
+      @stdout
     end
 
     def system(command)
-      exec(Shellwords.escape(command))
+      @stdout = STDOUT
+      @stderr = STDERR
+      exec(command)
       exitstatus
     end
 
-    def system!(command)
-      system(command).tap do |status|
-        raise RemoteError.new("#{command} exited #{status}") unless status == 0
+    def system!(*command)
+      system(*command).tap do |status|
+        raise RemoteError.new("#{command.join(" ")} exited #{status}") unless status == 0
       end
     end
 
@@ -48,10 +50,10 @@ module Soloist
       @connection ||= Net::SSH.start(host, user, :keys => [key], :timeout => timeout)
     end
 
-    def exec(command)
+    def exec(*command)
       connection.open_channel do |channel|
-        channel.exec(command) do |stream, success|
-          raise RemoteError.new("Could not run #{command}") unless success
+        channel.exec(*command) do |stream, success|
+          raise RemoteError.new("Could not run #{command.join(" ")}") unless success
           stream.on_data { |_, data| stdout << data }
           stream.on_extended_data { |_, type, data| stderr << data }
           stream.on_request("exit-status") { |_, data| @exitstatus = data.read_long }
