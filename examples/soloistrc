@@ -1,0 +1,4 @@
+cookbook_paths:
+  - ./cookbooks
+recipes:
+  - pivotal_workstation::ca_certs_to_match_heroku
