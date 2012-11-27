@@ -94,7 +94,7 @@ If we set `MEGA_PRODUCTION=godspeed`, the `embarrassment::parental` recipe is no
 
 Soloist can also run one-off recipes:
 
-    $ soloist DO_IT_LIVE lice::box
+    $ soloist run_recipe lice::box
     Installing lice (1.0.0)
     … chef output …
     INFO: Run List expands to [lice::box]
