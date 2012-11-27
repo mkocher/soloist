@@ -14,7 +14,6 @@ GEM
   specs:
     archive-tar-minitar (0.5.2)
     awesome_print (1.1.0)
-    bouncy-castle-java (1.5.0146.1)
     bunny (0.7.9)
     chef (10.16.2)
       bunny (>= 0.6.0, < 0.8.0)
@@ -46,7 +45,7 @@ GEM
     guard-bundler (1.0.0)
       bundler (~> 1.0)
       guard (~> 1.1)
-    guard-rspec (2.1.2)
+    guard-rspec (2.2.0)
       guard (>= 1.1)
       rspec (~> 2.11)
     guard-shell (0.5.1)
@@ -54,8 +53,6 @@ GEM
     hashie (1.2.0)
     highline (1.6.15)
     ipaddress (0.8.0)
-    jruby-openssl (0.7.7)
-      bouncy-castle-java (>= 1.5.0146.1)
     json (1.6.1)
     json (1.6.1-java)
     librarian (0.0.25)
@@ -128,7 +125,6 @@ DEPENDENCIES
   guard-bundler
   guard-rspec
   guard-shell
-  jruby-openssl
   rb-fsevent
   rspec
   soloist!

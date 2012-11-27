@@ -4,10 +4,5 @@ rvm:
   - 1.9.3
   - rbx-19mode
   - rbx-18mode
-  - jruby
-#  - ruby-head
   - ree
 script: script/ci.sh
-env:
-  jruby:
-    - JRUBY_OPTS="-Xcext.enabled=true"
