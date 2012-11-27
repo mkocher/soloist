@@ -1,6 +1,5 @@
 require "librarian/chef/cli"
 require "soloist/remote_config"
-require "soloist/known_hosts"
 require "soloist/spotlight"
 require "awesome_print"
 require "thor"
