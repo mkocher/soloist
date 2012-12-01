@@ -2,23 +2,25 @@ require "spec_helper"
 
 describe Soloist::CLI do
   let(:cli) { Soloist::CLI.new }
-  let(:base_path) { Dir.mktmpdir }
+  let(:base_path) { RSpec.configuration.tempdir }
   let(:soloistrc_path) { File.expand_path("soloistrc", base_path) }
 
   before do
     FileUtils.mkdir_p(base_path)
-    # FileUtils.touch(soloistrc_path)
-    # Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
+    Soloist::Config.any_instance.stub(:exec)
   end
 
   describe "#chef" do
     it "receives the outside environment" do
-      ENV["AUTREYISM"] = "pathological-yodeling"
-      cli.soloist_config.should_receive(:exec) do |chef_solo|
-        `#{chef_solo}`.chomp.should == "pathological-yodeling"
+      FileUtils.touch(soloistrc_path)
+      Dir.chdir(base_path) do
+        ENV["AUTREYISM"] = "pathological-yodeling"
+        cli.soloist_config.should_receive(:exec) do |chef_solo|
+          `#{chef_solo}`.chomp.should == "pathological-yodeling"
+        end
+        cli.soloist_config.stub(:chef_solo).and_return('echo $AUTREYISM')
+        cli.chef
       end
-      cli.soloist_config.stub(:chef_solo).and_return('echo $AUTREYISM')
-      cli.chef
     end
 
     context "when the soloistrc file does not exist" do
@@ -129,9 +131,11 @@ describe Soloist::CLI do
       end
 
       it "sets a recipe to run" do
-        cli.should_receive(:chef)
-        cli.run_recipe("angst::teenage", "ennui::default")
-        cli.soloist_config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
+        Dir.chdir(base_path) do
+          cli.should_receive(:chef)
+          cli.run_recipe("angst::teenage", "ennui::default")
+          cli.soloist_config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
+        end
       end
     end
   end
