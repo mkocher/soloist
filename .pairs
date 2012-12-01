@@ -1,0 +1,14 @@
+# This file is managed by chef! Override node.default["git_pairs_authors"] in attributes/git_pairs.rb to modify.
+
+pairs:
+  mk: Matthew Kocher; mkocher
+  bc: Brian Cunnie; cunnie
+  dr: Doc Ritezel; doc
+  ap: aram price; aram
+  sc: Santa Claus
+
+email:
+  prefix: pair
+  domain: pivotallabs.com
+
+global: true
