@@ -36,7 +36,6 @@ GEM
     coderay (1.0.8)
     diff-lcs (1.1.3)
     erubis (2.7.0)
-    godot (0.3.0)
     guard (1.5.4)
       listen (>= 0.4.2)
       lumberjack (>= 1.0.2)
@@ -121,7 +120,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  godot
   guard-bundler
   guard-rspec
   guard-shell
