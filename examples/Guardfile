@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+guard 'bundler' do
+  watch('../Gemfile')
+  watch('../soloist.gemspec')
+end
+
+guard 'shell' do
+  watch('soloistrc') { system("../bin/soloist -r 192.168.6.66") }
+  watch(%r{^cookbooks/(.+)\.rb$}) { system("unset RUBYOPT; bundle exec ../bin/soloist -r 192.168.6.66") }
+  watch('Vagrantfile') { system("unset RUBYOPT; vagrant provision") }
+  watch('script/bootstrap.sh') { system("unset RUBYOPT; vagrant provision") }
+end
