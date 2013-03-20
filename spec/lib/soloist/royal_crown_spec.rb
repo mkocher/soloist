@@ -31,6 +31,28 @@ describe Soloist::RoyalCrown do
     it "defaults nil fields to an empty primitive" do
       royal_crown.node_attributes.should == {}
     end
+
+    context "when the rc file has ERB tags" do
+      let(:tempfile) do
+        Tempfile.new("soloist-royalcrown").tap do |file|
+          file.write(<<-YAML
+          recipes:
+            - broken_vim
+          node_attributes:
+            evaluated: <%= "From ERB" %>
+          YAML
+          )
+          file.close
+        end
+      end
+
+      it "evaluates the ERB and parses the resulting YAML" do
+        royal_crown.node_attributes.should == {
+          "evaluated" => "From ERB"
+        }
+        royal_crown.recipes.should =~ ["broken_vim"]
+      end
+    end
   end
 
   describe "#save" do
