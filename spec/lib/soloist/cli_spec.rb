@@ -92,11 +92,28 @@ describe Soloist::CLI do
         end
 
         context "when the user is not root" do
-          it "creates the cache path using sudo" do
-            cli.soloist_config.should_receive(:exec) do |command|
-              command.should =~ /^sudo -E/
+          context "when rvm is not present" do
+            before do
+              cli.soloist_config.stub(:rvm?).and_return(false)
             end
-            cli.chef
+            it "creates the cache path using sudo" do
+              cli.soloist_config.should_receive(:exec) do |command|
+                command.should =~ /^sudo -E/
+              end
+              cli.chef
+            end
+          end
+
+          context "when rvm is present" do
+            before do
+              cli.soloist_config.stub(:rvm?).and_return(true)
+            end
+            it "creates the cache path using rvmsudo" do
+              cli.soloist_config.should_receive(:exec) do |command|
+                command.should =~ /rvmsudo -E/
+              end
+              cli.chef
+            end
           end
         end
 

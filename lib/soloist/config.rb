@@ -95,11 +95,16 @@ module Soloist
 
     private
     def conditional_sudo(command)
-      root? ? command : "sudo -E #{command}"
+      sudo_command = rvm? ? "rvmsudo_secure_path=1 rvmsudo" : "sudo"
+      root? ? command : "#{sudo_command} -E #{command}"
     end
 
     def root?
       Process.uid == 0
+    end
+
+    def rvm?
+      `which rvm`.length > 0
     end
 
     def royal_crown_cookbooks_directory
