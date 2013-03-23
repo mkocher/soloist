@@ -17,7 +17,7 @@ module Soloist
     def initialize(user, host, key, options = {})
       @user = user
       @host = host
-      @key = key
+      @key = File.expand_path(key)
       @timeout = options[:timeout] || 10000
     end
 

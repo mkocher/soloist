@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "chef"
   s.add_dependency "librarian"
   s.add_dependency "thor"
-  s.add_dependency "hashie"
+  s.add_dependency "hashie", "~> 2.0"
   s.add_dependency "net-ssh"
   s.add_dependency "awesome_print"
 

@@ -4,3 +4,5 @@ pkg/*
 /.vagrant
 /examples/cookbooks
 /examples/tmp
+tmp/
+Gemfile.lock

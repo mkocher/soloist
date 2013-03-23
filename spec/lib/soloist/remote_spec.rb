@@ -104,9 +104,17 @@ describe Soloist::Remote do
     end
   end
 
+  describe "#key" do
+    let(:home_directory) { File.expand_path("~") }
+
+    subject { Soloist::Remote.new("user", "host", "~/some_key") }
+    
+    its(:key) { should =~ %r|#{home_directory}/some_key| }
+  end
+
   describe "#upload" do
     it "runs rsync with the specified arguments" do
-      Kernel.should_receive(:system).with("rsync -e 'ssh -i key' -avz --delete from user@host:to opts")
+      Kernel.should_receive(:system).with("rsync -e 'ssh -i #{subject.key}' -avz --delete from user@host:to opts")
       subject.upload("from", "to", "opts")
     end
   end
@@ -127,9 +135,9 @@ describe Soloist::Remote do
     end
 
     context "when a key is provided" do
-      subject { Soloist::Remote.from_uri("dude@whatever", "yo-some-key") }
+      subject { Soloist::Remote.from_uri("dude@whatever", "/yo-some-key") }
 
-      its(:key) { should == "yo-some-key" }
+      its(:key) { should == "/yo-some-key" }
     end
   end
 end
