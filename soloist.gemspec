@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "chef"
   s.add_dependency "librarian"
+  s.add_dependency "librarian-chef" 
   s.add_dependency "thor"
   s.add_dependency "hashie"
   s.add_dependency "net-ssh"
