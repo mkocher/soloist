@@ -5,7 +5,8 @@ PATH
       awesome_print
       chef
       hashie
-      librarian (= 0.0.26)
+      librarian
+      librarian-chef
       net-ssh
       thor
 
@@ -50,11 +51,13 @@ GEM
     ipaddress (0.8.0)
     json (1.7.7)
     json (1.7.7-java)
-    librarian (0.0.26)
-      archive-tar-minitar (>= 0.5.2)
-      chef (>= 0.10)
+    librarian (0.1.0)
       highline
       thor (~> 0.15)
+    librarian-chef (0.0.1)
+      archive-tar-minitar (>= 0.5.2)
+      chef (>= 0.10)
+      librarian (~> 0.1.0)
     listen (0.6.0)
     lumberjack (1.0.2)
     method_source (0.8.1)
