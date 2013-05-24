@@ -5,3 +5,7 @@ pkg/*
 /examples/cookbooks
 /examples/tmp
 Gemfile.lock
+tmp
+vendor
+*.sw*
+*.un~
