@@ -8,6 +8,7 @@ module Soloist
   class CLI < Thor
     attr_writer :soloist_config
     default_task :chef
+    class_option :config_dir, :aliases => "-c", :desc => "Path to configuration"
 
     desc "chef", "Run chef-solo"
     method_option :remote, :aliases => "-r", :desc => "Run chef-solo on user@host"
@@ -68,7 +69,7 @@ module Soloist
     end
 
     def rc_path
-      @rc_path ||= Soloist::Spotlight.find!("soloistrc", ".soloistrc")
+      @rc_path ||= Soloist::Spotlight.find!("soloistrc", ".soloistrc", :custom_path => options[:config_dir])
     end
 
     def rc_local_path

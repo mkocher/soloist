@@ -11,14 +11,23 @@ module Soloist
     end
 
     def self.find!(*file_names)
-      new(Dir.pwd).find!(*file_names)
+      options = file_names.last.is_a?(Hash) ? file_names.pop : {}
+      new(Dir.pwd, options).find!(*file_names)
     end
 
-    def initialize(path)
+    def initialize(path, options={})
       @pathname = Pathname.new(path)
+      @options  = options
     end
 
     def find(*file_names)
+      if @options[:custom_path]
+        path      = Pathname.new(@options[:custom_path])
+        file_name = file_names.detect { |fn| path.join(fn).file? }
+
+        return path.join(file_name) if file_name
+      end
+
       pathname.ascend do |path|
         file_name = file_names.detect { |fn| path.join(fn).file? }
         break path.join(file_name) if file_name

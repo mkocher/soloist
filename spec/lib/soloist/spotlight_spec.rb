@@ -2,6 +2,7 @@ require "spec_helper"
 
 describe Soloist::Spotlight do
   let(:shallow_path) { File.expand_path("beans/roger", RSpec.configuration.tempdir) }
+  let(:custom_path) { Dir.mktmpdir }
   let(:spotlight) { Soloist::Spotlight.new(shallow_path) }
 
   before { FileUtils.mkdir_p(shallow_path) }
@@ -39,6 +40,17 @@ describe Soloist::Spotlight do
             raise
           end
         end.to raise_error(Soloist::NotFound)
+      end
+    end
+
+    context "with a custom config path" do
+      let(:file_path) { File.expand_path("soloistrc", custom_path) }
+      let(:spotlight) { Soloist::Spotlight.new(shallow_path, :custom_path => custom_path) }
+
+      before { FileUtils.touch(file_path) }
+
+      it "finds a soloistrc in the current directory" do
+        spotlight.find("soloistrc").to_s.should == File.join(custom_path, "soloistrc")
       end
     end
 

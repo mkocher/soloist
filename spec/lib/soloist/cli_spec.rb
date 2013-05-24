@@ -2,8 +2,11 @@ require "spec_helper"
 
 describe Soloist::CLI do
   let(:cli) { Soloist::CLI.new }
+  let(:cli_with_custom_config) { Soloist::CLI.new([], :config_dir => custom_soloistrc_path) }
   let(:base_path) { RSpec.configuration.tempdir }
   let(:soloistrc_path) { File.expand_path("soloistrc", base_path) }
+  let(:custom_soloistrc_path) { Dir.mktmpdir }
+  let(:custom_soloistrc) { File.expand_path("soloistrc", custom_soloistrc_path) }
 
   before do
     FileUtils.mkdir_p(base_path)
@@ -33,6 +36,20 @@ describe Soloist::CLI do
             raise
           end
         end.to raise_error(Soloist::NotFound)
+      end
+    end
+
+    context "when a custom soloistrc file exists" do
+      before do
+        File.open(custom_soloistrc, "w") do |file|
+          file.write(YAML.dump("recipes" => ["stinky::feets"]))
+        end
+        Dir.chdir(base_path) { cli_with_custom_config.soloist_config.stub(:exec) }
+      end
+
+      it "runs the proper recipes" do
+        cli_with_custom_config.chef
+        cli_with_custom_config.soloist_config.royal_crown.recipes.should =~ ["stinky::feets"]
       end
     end
 
