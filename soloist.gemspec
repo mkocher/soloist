@@ -33,4 +33,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rb-fsevent"
   s.add_development_dependency "terminal-notifier-guard"
   s.add_development_dependency "gem-release"
+  s.add_development_dependency "bundler", "~> 1.3"
+  s.add_development_dependency "rake"
 end
