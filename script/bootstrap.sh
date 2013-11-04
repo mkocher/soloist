@@ -31,8 +31,7 @@ RVMRC_CONTENTS
 
 echo "Detecting RVM requirements"
 
-bash -lc 'rvm requirements' | tee /tmp/rvm-requirements > /dev/null
-packages=`grep "  ruby: /usr/bin/apt-get install" /tmp/rvm-requirements | sed "s/  ruby: \/usr\/bin\/apt-get install //g"`
+packages="build-essential openssl libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev libgdbm-dev ncurses-dev automake libtool bison subversion pkg-config libffi-dev"
 
 echo "Detected RVM requirements: $packages"
 
@@ -50,5 +49,5 @@ then
   echo "Satisfied RVM requirements"
 else
   echo "Installing missing RVM requirements: $to_install"
-  sudo apt-get install -y $to_install
+  sudo apt-get --no-install-recommends install -y $to_install
 fi
