@@ -4,8 +4,7 @@
 
 Soloist lets you quickly and easily converge [Chef](http://opscode.com/chef) recipes using [chef-solo](http://wiki.opscode.com/display/chef/Chef+Solo).  It does not require a Chef server, but can exploit [community cookbooks](http://community.opscode.com/cookbooks), github-hosted cookbooks and locally-sourced cookbooks through [Librarian](https://github.com/applicationsonline/librarian).
 
-Soloist was originally built to support the [Pivotal Labs Workstation Cookbook](https://github.com/pivotal/pivotal_workstation).
-
+Soloist was originally built to support the [Pivotal Labs Workstation Cookbook](https://github.com/pivotal/pivotal_workstation), now known as [Sprout](https://github.com/pivotal-sprout/sprout).
 
 Using Soloist
 -------------
