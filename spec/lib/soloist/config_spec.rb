@@ -109,6 +109,10 @@ describe Soloist::Config do
         "TONGUES" => {
           "FINE" => {
             "recipes" => ["hobo_fist"],
+            "cookbook_paths" => ["shell_in"],
+            "node_attributes" => {
+              "doc" => "absent"
+            },
             "env_variable_switches" => nested
           }
         }
@@ -132,6 +136,10 @@ describe Soloist::Config do
         config.compiled.recipes.should =~ ["hobo_fist"]
       end
 
+      it "merges the node attributes" do
+        config.compiled.node_attributes.should == {"doc" => "absent"}
+      end
+
       context "when an inactive switch is nested" do
         let(:nested) { {"BEANS" => {"EW" => {"recipes" => ["slammin"]}}} }
 
@@ -141,10 +149,15 @@ describe Soloist::Config do
       end
 
       context "when an active switch is nested" do
-        let(:nested) { {"BEANS" => {"FINE" => {"recipes" => ["slammin"]}}} }
+        let(:nested) { {"BEANS" => {"FINE" => {"cookbook_paths" => ["shell_out"], "recipes" => ["slammin"], "node_attributes" => {"kocher" => "present"}}}} }
 
         it "merges the attributes" do
-          config.compiled.recipes.should =~ ["slammin"]
+          config.compiled.recipes.should =~ ["slammin", "hobo_fist"]
+          config.compiled.cookbook_paths.should =~ ["shell_in", "shell_out"]
+        end
+
+        it "merges the node attributes" do
+          config.compiled.node_attributes.should == {"doc" => "absent", "kocher" => "present"}
         end
       end
     end

@@ -14,8 +14,25 @@ module Soloist
       self["node_attributes"] = Hashie::Mash.new(hash)
     end
 
+    def merge!(other_royal_crown)
+      merge_recipes(other_royal_crown["recipes"])
+      merge_cookbook_paths(other_royal_crown["cookbook_paths"])
+      self.node_attributes.deep_merge!(other_royal_crown["node_attributes"])
+      self.env_variable_switches = other_royal_crown["env_variable_switches"]
+      self
+    end
+
+    def merge_recipes(new_recipes = [])
+      merge_array_property("recipes", new_recipes)
+    end
+
+    def merge_cookbook_paths(new_cookbook_paths = [])
+      merge_array_property("cookbook_paths", new_cookbook_paths)
+    end
+
     def env_variable_switches=(hash)
-      self["env_variable_switches"] = Hashie::Mash.new(hash)
+      self["env_variable_switches"] ||= Hashie::Mash.new
+      self["env_variable_switches"].merge!(Hashie::Mash.new(hash))
     end
 
     def to_yaml
@@ -51,6 +68,12 @@ module Soloist
     private
     def self.nilable_properties
       (properties - [:path]).map(&:to_s)
+    end
+
+    def merge_array_property(property_name, values)
+      self[property_name] ||= []
+      self[property_name] += values
+      self[property_name].uniq!
     end
   end
 end
