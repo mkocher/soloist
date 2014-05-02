@@ -132,7 +132,7 @@ describe Soloist::Config do
     context "when a switch is active" do
       before { ENV.stub(:[]).and_return("FINE") }
 
-      it "merges the attributes" do
+      it "merges the recipes" do
         config.compiled.recipes.should =~ ["hobo_fist"]
       end
 
@@ -140,10 +140,26 @@ describe Soloist::Config do
         config.compiled.node_attributes.should == {"doc" => "absent"}
       end
 
+      context "but has no recipes" do
+        let(:switch) { {"TONGUES" => {"FINE" => {"node_attributes" => {"doc" => "absent"},"env_variable_switches" => nested}}} }
+
+        it "merges the recipes" do
+          config.compiled.recipes.should =~ []
+        end
+      end
+
+      context "but has no node attributes" do
+        let(:switch) { {"TONGUES" => {"FINE" => {"recipes" => ["hobo_fist"], "cookbook_paths" => ["shell_in"], "env_variable_switches" => nested}}} }
+
+        it "merges the node attributes" do
+          config.compiled.node_attributes.should == {}
+        end
+      end
+
       context "when an inactive switch is nested" do
         let(:nested) { {"BEANS" => {"EW" => {"recipes" => ["slammin"]}}} }
 
-        it "does not merge the attributes" do
+        it "does not merge the recipes" do
           config.compiled.recipes.should =~ ["hobo_fist"]
         end
       end
@@ -158,6 +174,23 @@ describe Soloist::Config do
 
         it "merges the node attributes" do
           config.compiled.node_attributes.should == {"doc" => "absent", "kocher" => "present"}
+        end
+
+        context "but has no recipes or cookbook_paths" do
+          let(:nested) { {"BEANS" => {"FINE" => {"node_attributes" => {"kocher" => "present"}}}} }
+
+          it "keeps the original recipes and cookbook_paths" do
+            config.compiled.recipes.should =~ ["hobo_fist"]
+            config.compiled.cookbook_paths.should =~ ["shell_in"]
+          end
+        end
+
+        context "but has no node attributes" do
+          let(:nested) { {"BEANS" => {"FINE" => {"cookbook_paths" => ["shell_out"], "recipes" => ["slammin"]}}} }
+
+          it "keeps the node attributes" do
+            config.compiled.node_attributes.should == {"doc" => "absent"}
+          end
         end
       end
     end
