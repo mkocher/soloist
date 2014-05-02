@@ -17,7 +17,7 @@ module Soloist
     def merge!(other_royal_crown)
       merge_recipes(other_royal_crown["recipes"])
       merge_cookbook_paths(other_royal_crown["cookbook_paths"])
-      self.node_attributes.deep_merge!(other_royal_crown["node_attributes"])
+      self.node_attributes.deep_merge!(other_royal_crown["node_attributes"]) if other_royal_crown["node_attributes"]
       self.env_variable_switches = other_royal_crown["env_variable_switches"]
       self
     end
@@ -72,7 +72,7 @@ module Soloist
 
     def merge_array_property(property_name, values)
       self[property_name] ||= []
-      self[property_name] += values
+      self[property_name] += values if values
       self[property_name].uniq!
     end
   end
