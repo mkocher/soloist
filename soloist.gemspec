@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
 
   s.license = 'MIT'
 
-  s.add_dependency "chef"
+  s.add_dependency "chef", "~> 11.16.4"
   s.add_dependency "librarian-chef"
   s.add_dependency "thor"
   s.add_dependency "hashie", "~> 2.0"
