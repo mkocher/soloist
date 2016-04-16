@@ -108,8 +108,10 @@ describe Soloist::Remote do
     let(:home_directory) { File.expand_path("~") }
 
     subject { Soloist::Remote.new("user", "host", "~/some_key") }
-    
-    its(:key) { should =~ %r|#{home_directory}/some_key| }
+
+    it "matches a subdirectory in the home directory" do
+      expect(subject.key).to match(%r|#{home_directory}/some_key|)
+    end
   end
 
   describe "#upload" do
@@ -123,8 +125,13 @@ describe Soloist::Remote do
     context "when a user is provided" do
       subject { Soloist::Remote.from_uri("destructo@1.2.3.4") }
 
-      its(:user) { should == "destructo" }
-      its(:host) { should == "1.2.3.4" }
+      it "has a user equal to the user in the URI" do
+        expect(subject.user).to eq("destructo")
+      end
+
+      it "has a host equal to the host in the URI" do
+        expect(subject.host).to eq("1.2.3.4")
+      end
     end
 
     context "when a user is not provided" do
@@ -137,7 +144,9 @@ describe Soloist::Remote do
     context "when a key is provided" do
       subject { Soloist::Remote.from_uri("dude@whatever", "/yo-some-key") }
 
-      its(:key) { should == "/yo-some-key" }
+      it "has a key equal to the provided key" do
+        expect(subject.key).to eq("/yo-some-key")
+      end
     end
   end
 end

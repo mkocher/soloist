@@ -49,7 +49,7 @@ describe Soloist::RemoteConfig do
 
     it "creates the path remotely" do
       commands_for(:chef_config_path).tap do |commands|
-        commands.should have(1).command
+        expect(commands.size).to eq(1)
         commands.first.should =~ /mkdir .*? -p \/etc\/chef$/
       end
     end
@@ -62,7 +62,7 @@ describe Soloist::RemoteConfig do
 
     it "creates the path remotely" do
       commands_for(:chef_cache_path).tap do |commands|
-        commands.should have(1).command
+        expect(commands.size).to eq(1)
         commands.first.should =~ /mkdir .*? -p \/var\/chef\/cache$/
       end
     end
@@ -70,13 +70,13 @@ describe Soloist::RemoteConfig do
 
   describe "#cookbook_paths" do
     it "sets the path" do
-      remote_config.cookbook_paths.should have(1).path
+      expect(remote_config.cookbook_paths.size).to eq(1)
       remote_config.cookbook_paths.should =~ ["/var/chef/cookbooks"]
     end
 
     it "creates the path remotely" do
       commands_for(:cookbook_paths).tap do |commands|
-        commands.should have(1).command
+        expect(commands.size).to eq(1)
         commands.first.should =~ /mkdir .*? -p \/var\/chef\/cookbooks$/
       end
     end

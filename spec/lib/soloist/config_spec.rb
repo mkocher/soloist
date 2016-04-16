@@ -18,19 +18,25 @@ describe Soloist::Config do
     subject { config.cookbook_paths }
 
     context "when the default cookbook path does not exist" do
-      it { should have(0).paths }
+      it "should have no paths" do
+        expect(subject.size).to eq(0)
+      end
     end
 
     context "when the default cookbook path exists" do
       before { FileUtils.mkdir_p(cookbook_path) }
 
-      it { should have(1).path }
+      it "should have one path" do
+        expect(subject.size).to eq(1)
+      end
       it { should =~ [cookbook_path] }
 
       context "when the default cookbook path is specified" do
         before { soloist_rc.cookbook_paths = [cookbook_path] }
 
-        it { should have(1).path }
+        it "should have one path" do
+          expect(subject.size).to eq(1)
+        end
         it { should =~ [cookbook_path] }
       end
 
@@ -40,19 +46,25 @@ describe Soloist::Config do
         context "when the specified path exists" do
           before { FileUtils.mkdir_p(nested_cookbook_path) }
 
-          it { should have(2).paths }
+          it "should have two path" do
+            expect(subject.size).to eq(2)
+          end
           it { should =~ [cookbook_path, nested_cookbook_path] }
 
           context "with duplicate cookbook paths" do
             before { soloist_rc.cookbook_paths = [nested_cookbook_path, nested_cookbook_path] }
 
-            it { should have(2).paths }
+            it "should have two path" do
+              expect(subject.size).to eq(2)
+            end
             it { should =~ [cookbook_path, nested_cookbook_path] }
           end
         end
 
         context "when the specified path does not exist" do
-          it { should have(1).path }
+          it "should have one path" do
+            expect(subject.size).to eq(1)
+          end
           it { should =~ [cookbook_path] }
         end
       end
@@ -64,7 +76,9 @@ describe Soloist::Config do
         FileUtils.mkdir_p(nested_cookbook_path)
       end
 
-      it { should have(1).path }
+      it "should have one path" do
+        expect(subject.size).to eq(1)
+      end
       it { should =~ [nested_cookbook_path] }
     end
 
@@ -73,7 +87,9 @@ describe Soloist::Config do
 
       before { soloist_rc.cookbook_paths = ["~"] }
 
-      it { should have(1).path }
+      it "should have one path" do
+        expect(subject.size).to eq(1)
+      end
       it { should =~ [home] }
     end
   end
@@ -97,7 +113,9 @@ describe Soloist::Config do
     describe "recipes" do
       subject { config.as_node_json["recipes"] }
 
-      it { should have(1).recipe }
+      it "should have one path" do
+        expect(subject.size).to eq(1)
+      end
       it { should =~ ["waffles"] }
     end
   end
