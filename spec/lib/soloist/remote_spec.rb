@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Soloist::Remote do
+RSpec.describe Soloist::Remote do
   include Net::SSH::Test
 
   subject { Soloist::Remote.new("user", "host", "key") }

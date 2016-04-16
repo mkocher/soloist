@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Soloist::RoyalCrown do
+RSpec.describe Soloist::RoyalCrown do
   let(:contents) { { "recipes" => ["broken_vim"] } }
   let(:tempfile) do
     Tempfile.new("soloist-royalcrown").tap do |file|

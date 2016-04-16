@@ -12,4 +12,5 @@ RSpec.configure do |config|
   config.add_setting :tempdir
   config.before(:each) { RSpec.configuration.tempdir = Dir.mktmpdir }
   config.after(:each) { FileUtils.rm_rf(RSpec.configuration.tempdir) }
+  config.expose_dsl_globally = false
 end

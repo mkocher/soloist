@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Soloist::Config do
+RSpec.describe Soloist::Config do
   let(:soloist_rc_path) { File.expand_path("soloistrc", RSpec.configuration.tempdir) }
   let(:soloist_rc) { Soloist::RoyalCrown.new(:path => soloist_rc_path) }
   let(:config) { Soloist::Config.new(soloist_rc) }

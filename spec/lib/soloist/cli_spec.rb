@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Soloist::CLI do
+RSpec.describe Soloist::CLI do
   let(:cli) { Soloist::CLI.new }
   let(:base_path) { RSpec.configuration.tempdir }
   let(:soloistrc_path) { File.expand_path("soloistrc", base_path) }

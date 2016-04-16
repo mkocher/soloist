@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Soloist::RemoteConfig do
+RSpec.describe Soloist::RemoteConfig do
   let(:royal_crown_path) { File.expand_path("soloistrc", RSpec.configuration.tempdir) }
   let(:royal_crown) { Soloist::RoyalCrown.new(:path => royal_crown_path) }
   let(:remote) { Soloist::Remote.new("user", "host", "key") }

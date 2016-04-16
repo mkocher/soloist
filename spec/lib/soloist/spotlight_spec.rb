@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Soloist::Spotlight do
+RSpec.describe Soloist::Spotlight do
   let(:shallow_path) { File.expand_path("beans/roger", RSpec.configuration.tempdir) }
   let(:spotlight) { Soloist::Spotlight.new(shallow_path) }
 
