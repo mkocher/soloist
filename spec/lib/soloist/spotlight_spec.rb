@@ -13,7 +13,7 @@ describe Soloist::Spotlight do
           begin
             spotlight.find!("larry", "moe", "curly")
           rescue Soloist::NotFound => e
-            e.message.should == "Could not find larry, moe or curly"
+            expect(e.message).to eq("Could not find larry, moe or curly")
             raise
           end
         end.to raise_error(Soloist::NotFound)
@@ -24,7 +24,7 @@ describe Soloist::Spotlight do
           begin
             spotlight.find!("lulz", "wut")
           rescue Soloist::NotFound => e
-            e.message.should == "Could not find lulz or wut"
+            expect(e.message).to eq("Could not find lulz or wut")
             raise
           end
         end.to raise_error(Soloist::NotFound)
@@ -35,7 +35,7 @@ describe Soloist::Spotlight do
           begin
             spotlight.find!("whatever.dude")
           rescue Soloist::NotFound => e
-            e.message.should == "Could not find whatever.dude"
+            expect(e.message).to eq("Could not find whatever.dude")
             raise
           end
         end.to raise_error(Soloist::NotFound)
@@ -48,7 +48,7 @@ describe Soloist::Spotlight do
       before { FileUtils.touch(file_path) }
 
       it "finds a soloistrc in the current directory" do
-        spotlight.find("soloistrc").to_s.should =~ /\/beans\/roger\/soloistrc$/
+        expect(spotlight.find("soloistrc").to_s).to match(/\/beans\/roger\/soloistrc$/)
       end
 
       context "inside a deeper directory" do
@@ -58,7 +58,7 @@ describe Soloist::Spotlight do
         before { FileUtils.mkdir_p(deep_path) }
 
         it "finds a soloistrc upwards" do
-          spotlight.find("soloistrc").to_s.should == file_path
+          expect(spotlight.find("soloistrc").to_s).to eq(file_path)
         end
       end
     end

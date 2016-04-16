@@ -29,7 +29,7 @@ describe Soloist::Config do
       it "should have one path" do
         expect(subject.size).to eq(1)
       end
-      it { should =~ [cookbook_path] }
+      it { is_expected.to match_array([cookbook_path]) }
 
       context "when the default cookbook path is specified" do
         before { soloist_rc.cookbook_paths = [cookbook_path] }
@@ -37,7 +37,7 @@ describe Soloist::Config do
         it "should have one path" do
           expect(subject.size).to eq(1)
         end
-        it { should =~ [cookbook_path] }
+        it { is_expected.to match_array([cookbook_path]) }
       end
 
       context "with a specified cookbook path" do
@@ -49,7 +49,7 @@ describe Soloist::Config do
           it "should have two path" do
             expect(subject.size).to eq(2)
           end
-          it { should =~ [cookbook_path, nested_cookbook_path] }
+          it { is_expected.to match_array([cookbook_path, nested_cookbook_path]) }
 
           context "with duplicate cookbook paths" do
             before { soloist_rc.cookbook_paths = [nested_cookbook_path, nested_cookbook_path] }
@@ -57,7 +57,7 @@ describe Soloist::Config do
             it "should have two path" do
               expect(subject.size).to eq(2)
             end
-            it { should =~ [cookbook_path, nested_cookbook_path] }
+            it { is_expected.to match_array([cookbook_path, nested_cookbook_path]) }
           end
         end
 
@@ -65,7 +65,7 @@ describe Soloist::Config do
           it "should have one path" do
             expect(subject.size).to eq(1)
           end
-          it { should =~ [cookbook_path] }
+          it { is_expected.to match_array([cookbook_path]) }
         end
       end
     end
@@ -79,7 +79,7 @@ describe Soloist::Config do
       it "should have one path" do
         expect(subject.size).to eq(1)
       end
-      it { should =~ [nested_cookbook_path] }
+      it { is_expected.to match_array([nested_cookbook_path]) }
     end
 
     context "with unixisms in the cookbook path" do
@@ -90,7 +90,7 @@ describe Soloist::Config do
       it "should have one path" do
         expect(subject.size).to eq(1)
       end
-      it { should =~ [home] }
+      it { is_expected.to match_array([home]) }
     end
   end
 
@@ -116,7 +116,7 @@ describe Soloist::Config do
       it "should have one path" do
         expect(subject.size).to eq(1)
       end
-      it { should =~ ["waffles"] }
+      it { is_expected.to match_array(["waffles"]) }
     end
   end
 
@@ -140,29 +140,29 @@ describe Soloist::Config do
     before { config.royal_crown.env_variable_switches = switch }
 
     context "when the switch is inactive" do
-      before { ENV.stub(:[]).and_return("LOLWUT") }
+      before { allow(ENV).to receive(:[]).and_return("LOLWUT") }
 
       it "does not merge the attribute" do
-        config.compiled["recipes"].should be_empty
+        expect(config.compiled["recipes"]).to be_empty
       end
     end
 
     context "when a switch is active" do
-      before { ENV.stub(:[]).and_return("FINE") }
+      before { allow(ENV).to receive(:[]).and_return("FINE") }
 
       it "merges the attributes" do
-        config.compiled.recipes.should =~ ["hobo_fist"]
+        expect(config.compiled.recipes).to match_array(["hobo_fist"])
       end
 
       it "merges the node attributes" do
-        config.compiled.node_attributes.should == {"doc" => "absent"}
+        expect(config.compiled.node_attributes).to eq("doc" => "absent")
       end
 
       context "when an inactive switch is nested" do
         let(:nested) { {"BEANS" => {"EW" => {"recipes" => ["slammin"]}}} }
 
         it "does not merge the attributes" do
-          config.compiled.recipes.should =~ ["hobo_fist"]
+          expect(config.compiled.recipes).to match_array(["hobo_fist"])
         end
       end
 
@@ -170,12 +170,12 @@ describe Soloist::Config do
         let(:nested) { {"BEANS" => {"FINE" => {"cookbook_paths" => ["shell_out"], "recipes" => ["slammin"], "node_attributes" => {"kocher" => "present"}}}} }
 
         it "merges the attributes" do
-          config.compiled.recipes.should =~ ["slammin", "hobo_fist"]
-          config.compiled.cookbook_paths.should =~ ["shell_in", "shell_out"]
+          expect(config.compiled.recipes).to match_array(["slammin", "hobo_fist"])
+          expect(config.compiled.cookbook_paths).to match_array(["shell_in", "shell_out"])
         end
 
         it "merges the node attributes" do
-          config.compiled.node_attributes.should == {"doc" => "absent", "kocher" => "present"}
+          expect(config.compiled.node_attributes).to eq("doc" => "absent", "kocher" => "present")
         end
       end
     end
@@ -188,14 +188,14 @@ describe Soloist::Config do
 
     it "merges another config into the current one" do
       config.merge!(other_config)
-      config.royal_crown.recipes.should =~ ["guts", "chum"]
-      config.royal_crown.node_attributes.keys.should =~ ["reliable", "tasty"]
+      expect(config.royal_crown.recipes).to match_array(["guts", "chum"])
+      expect(config.royal_crown.node_attributes.keys).to match_array(["reliable", "tasty"])
     end
 
     it "does not trample the other config" do
       config.merge!(other_config)
-      other_config.royal_crown.recipes.should =~ ["chum"]
-      other_config.royal_crown.node_attributes.should == {"tasty" => "maybe"}
+      expect(other_config.royal_crown.recipes).to match_array(["chum"])
+      expect(other_config.royal_crown.node_attributes).to eq("tasty" => "maybe")
     end
   end
 
@@ -207,7 +207,7 @@ describe Soloist::Config do
     end
 
     context "when LOG_LEVEL is set" do
-      before { ENV.stub(:[] => "BEANS") }
+      before { allow(ENV).to receive(:[]).and_return("BEANS") }
       it { should == "BEANS" }
     end
   end
@@ -220,7 +220,7 @@ describe Soloist::Config do
     end
 
     context "when log_level is debug" do
-      before { config.stub(:log_level => "debug") }
+      before { allow(config).to receive(:log_level).and_return("debug") }
       it { should be }
     end
   end

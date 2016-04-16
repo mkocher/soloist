@@ -7,7 +7,7 @@ describe Soloist::CLI do
 
   before do
     FileUtils.mkdir_p(base_path)
-    Soloist::Config.any_instance.stub(:exec)
+    allow_any_instance_of(Soloist::Config).to receive(:exec)
   end
 
   describe "#chef" do
@@ -15,10 +15,10 @@ describe Soloist::CLI do
       FileUtils.touch(soloistrc_path)
       Dir.chdir(base_path) do
         ENV["AUTREYISM"] = "pathological-yodeling"
-        cli.soloist_config.should_receive(:exec) do |chef_solo|
-          `#{chef_solo}`.chomp.should == "pathological-yodeling"
+        expect(cli.soloist_config).to receive(:exec) do |chef_solo|
+          expect(`#{chef_solo}`.chomp).to eq("pathological-yodeling")
         end
-        cli.soloist_config.stub(:chef_solo).and_return('echo $AUTREYISM')
+        allow(cli.soloist_config).to receive(:chef_solo).and_return('echo $AUTREYISM')
         cli.chef
       end
     end
@@ -29,7 +29,7 @@ describe Soloist::CLI do
           begin
             Dir.chdir(base_path) { cli.chef }
           rescue Soloist::NotFound => e
-            e.message.should == "Could not find soloistrc or .soloistrc"
+            expect(e.message).to eq("Could not find soloistrc or .soloistrc")
             raise
           end
         end.to raise_error(Soloist::NotFound)
@@ -42,12 +42,12 @@ describe Soloist::CLI do
           file.write(YAML.dump("recipes" => ["stinky::feet"]))
         end
         cli.soloist_config = nil
-        Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
+        Dir.chdir(base_path) { allow(cli.soloist_config).to receive(:exec) }
       end
 
       it "runs the proper recipes" do
         cli.chef
-        cli.soloist_config.royal_crown.recipes.should =~ ["stinky::feet"]
+        expect(cli.soloist_config.royal_crown.recipes).to match_array(["stinky::feet"])
       end
 
       context "when a soloistrc_local file exists" do
@@ -58,23 +58,23 @@ describe Soloist::CLI do
             file.write(YAML.dump("recipes" => ["stinky::socks"]))
           end
           cli.soloist_config = nil
-          Dir.chdir(base_path) { cli.soloist_config.stub(:exec) }
+          Dir.chdir(base_path) { allow(cli.soloist_config).to receive(:exec) }
         end
 
         it "installs the proper recipes" do
           cli.chef
-          cli.soloist_config.royal_crown.recipes.should =~ ["stinky::feet", "stinky::socks"]
+          expect(cli.soloist_config.royal_crown.recipes).to match_array(["stinky::feet", "stinky::socks"])
         end
       end
 
       context "when the Cheffile does not exist" do
         it "runs chef" do
-          cli.soloist_config.should_receive(:exec)
+          expect(cli.soloist_config).to receive(:exec)
           cli.chef
         end
 
         it "does not run librarian" do
-          Librarian::Chef::Cli.should_not_receive(:with_environment)
+          expect(Librarian::Chef::Cli).to_not receive(:with_environment)
           cli.chef
         end
       end
@@ -85,27 +85,27 @@ describe Soloist::CLI do
         before { FileUtils.touch(File.expand_path("Cheffile", base_path)) }
 
         it "runs librarian" do
-          Librarian::Chef::Cli.should_receive(:with_environment).and_yield
-          Librarian::Chef::Cli.should_receive(:new).and_return(cli_instance)
-          cli_instance.should_receive(:install)
+          expect(Librarian::Chef::Cli).to receive(:with_environment).and_yield
+          expect(Librarian::Chef::Cli).to receive(:new).and_return(cli_instance)
+          expect(cli_instance).to receive(:install)
           cli.chef
         end
 
         context "when the user is not root" do
           it "creates the cache path using sudo" do
-            cli.soloist_config.should_receive(:exec) do |command|
-              command.should =~ /^sudo -E/
+            expect(cli.soloist_config).to receive(:exec) do |command|
+              expect(command).to match(/^sudo -E/)
             end
             cli.chef
           end
         end
 
         context "when the user is root" do
-          before { Process.stub(:uid => 0) }
+          before { allow(Process).to receive(:uid).and_return(0) }
 
           it "creates the cache path" do
-            cli.soloist_config.should_receive(:exec) do |command|
-              command.should_not =~ /^sudo -E/
+            expect(cli.soloist_config).to receive(:exec) do |command|
+              expect(command).to_not match(/^sudo -E/)
             end
             cli.chef
           end
@@ -132,9 +132,9 @@ describe Soloist::CLI do
 
       it "sets a recipe to run" do
         Dir.chdir(base_path) do
-          cli.should_receive(:chef)
+          expect(cli).to receive(:chef)
           cli.run_recipe("angst::teenage", "ennui::default")
-          cli.soloist_config.royal_crown.recipes.should =~ ["angst::teenage", "ennui::default"]
+          expect(cli.soloist_config.royal_crown.recipes).to match_array(["angst::teenage", "ennui::default"])
         end
       end
     end
@@ -144,10 +144,10 @@ describe Soloist::CLI do
     let(:royal_crown) { Soloist::RoyalCrown.new(:node_attributes => {"a" => "b"}) }
     let(:config) { Soloist::Config.new(royal_crown) }
 
-    before { cli.stub(:soloist_config => config) }
+    before { allow(cli).to receive(:soloist_config).and_return(config) }
 
     it "prints the hash render of the RoyalCrown" do
-      Kernel.should_receive(:ap).with({"recipes"=>[], "a" => "b"})
+      expect(Kernel).to receive(:ap).with({"recipes"=>[], "a" => "b"})
       cli.config
     end
   end

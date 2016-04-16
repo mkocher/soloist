@@ -10,7 +10,7 @@ describe Soloist::Remote do
   shared_examples "ssh exec" do |command|
     let(:stdio) { double(:stdio, :<< => nil) }
 
-    before { subject.stub(:stdout => stdio, :stderr => stdio) }
+    before { allow(subject).to receive_messages(:stdout => stdio, :stderr => stdio) }
 
     context "when properly connected" do
       before do
@@ -21,7 +21,7 @@ describe Soloist::Remote do
       end
 
       it "returns standard output" do
-        stdio.should_receive(:<<).with("endless bummer")
+        expect(stdio).to receive(:<<).with("endless bummer")
         described_function
       end
 
@@ -50,7 +50,7 @@ describe Soloist::Remote do
           channel.gets_extended_data "yodawg i put an error in your error"
           channel.gets_exit_status(127)
         end
-        subject.stub(:stderr => stdio)
+        allow(subject).to receive(:stderr).and_return(stdio)
       end
 
       it "returns the exit status" do
@@ -58,7 +58,7 @@ describe Soloist::Remote do
       end
 
       it "sends output to stderr" do
-        subject.stderr.should_receive(:<<).with("yodawg i put an error in your error")
+        expect(subject.stderr).to receive(:<<).with("yodawg i put an error in your error")
         described_function
       end
     end
@@ -69,10 +69,10 @@ describe Soloist::Remote do
     it_behaves_like "ssh exec", "not-a-japanese-band"
 
     it "returns stdout" do
-      subject.should_receive(:exec) do
+      expect(subject).to receive(:exec) do
         subject.stdout << "wut"
       end
-      described_function.should == "wut"
+      expect(described_function).to eq("wut")
     end
   end
 
@@ -82,24 +82,24 @@ describe Soloist::Remote do
 
     it "returns the exit code" do
       subject.instance_variable_set(:@exitstatus, 666)
-      subject.should_receive(:exec)
-      described_function.should == 666
+      expect(subject).to receive(:exec)
+      expect(described_function).to eq(666)
     end
   end
 
   describe "#system!" do
     it "calls through to system" do
-      subject.should_receive(:system).and_return(0)
+      expect(subject).to receive(:system).and_return(0)
       subject.system!("whatever-dude")
     end
 
     it "does not raise an exception if there is no error" do
-      subject.stub(:system => 0)
+      allow(subject).to receive(:system).and_return(0)
       expect { subject.system!("totally-chill-or-whatever") }.not_to raise_error
     end
 
     it "raises an exception if there is an error" do
-      subject.stub(:system => 1)
+      allow(subject).to receive(:system).and_return(1)
       expect { subject.system!("omg-wtf") }.to raise_error(Soloist::RemoteError)
     end
   end
@@ -116,7 +116,7 @@ describe Soloist::Remote do
 
   describe "#upload" do
     it "runs rsync with the specified arguments" do
-      Kernel.should_receive(:system).with("rsync -e 'ssh -i #{subject.key}' -avz --delete from user@host:to opts")
+      expect(Kernel).to receive(:system).with("rsync -e 'ssh -i #{subject.key}' -avz --delete from user@host:to opts")
       subject.upload("from", "to", "opts")
     end
   end
@@ -136,8 +136,8 @@ describe Soloist::Remote do
 
     context "when a user is not provided" do
       it "sets the correct user" do
-        Etc.should_receive(:getlogin).and_return("jim-bob")
-        Soloist::Remote.from_uri("1.2.3.4").user.should == "jim-bob"
+        expect(Etc).to receive(:getlogin).and_return("jim-bob")
+        expect(Soloist::Remote.from_uri("1.2.3.4").user).to eq("jim-bob")
       end
     end
 

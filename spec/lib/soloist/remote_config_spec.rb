@@ -6,64 +6,64 @@ describe Soloist::RemoteConfig do
   let(:remote) { Soloist::Remote.new("user", "host", "key") }
   let(:remote_config) { Soloist::RemoteConfig.new(royal_crown, remote) }
 
-  before { remote.stub(:backtick => "", :system => 0) }
+  before { allow(remote).to receive_messages(:backtick => "", :system => 0) }
 
   def commands_for(method)
     [].tap do |commands|
-      remote.stub(:system) { |c| commands << c; 0 }
-      remote.stub(:backtick) { |c| commands << c; "" }
+      allow(remote).to receive(:system) { |c| commands << c; 0 }
+      allow(remote).to receive(:backtick) { |c| commands << c; "" }
       remote_config.send(method)
     end
   end
 
   describe "#run_chef" do
     it "runs chef" do
-      commands_for(:run_chef).last.should include "chef-solo"
+      expect(commands_for(:run_chef).last).to include "chef-solo"
     end
   end
 
   describe "#solo_rb_path" do
     it "sets the path to /etc/chef/solo.rb" do
-      remote_config.solo_rb_path.should == "/etc/chef/solo.rb"
+      expect(remote_config.solo_rb_path).to eq("/etc/chef/solo.rb")
     end
 
     it "sets up solo.rb remotely" do
-      commands_for(:solo_rb_path).last.should =~ /sudo -E tee \/etc\/chef\/solo\.rb$/
+      expect(commands_for(:solo_rb_path).last).to match(/sudo -E tee \/etc\/chef\/solo\.rb$/)
     end
   end
 
   describe "#node_json_path" do
     it "sets the path" do
-      remote_config.node_json_path.should == "/etc/chef/node.json"
+      expect(remote_config.node_json_path).to eq("/etc/chef/node.json")
     end
 
     it "sets up node.json remotely" do
-      commands_for(:node_json_path).last.should =~ /sudo -E tee \/etc\/chef\/node\.json$/
+      expect(commands_for(:node_json_path).last).to match(/sudo -E tee \/etc\/chef\/node\.json$/)
     end
   end
 
   describe "#chef_config_path" do
     it "sets the path" do
-      remote_config.chef_config_path.should == "/etc/chef"
+      expect(remote_config.chef_config_path).to eq("/etc/chef")
     end
 
     it "creates the path remotely" do
       commands_for(:chef_config_path).tap do |commands|
         expect(commands.size).to eq(1)
-        commands.first.should =~ /mkdir .*? -p \/etc\/chef$/
+        expect(commands.first).to match(/mkdir .*? -p \/etc\/chef$/)
       end
     end
   end
 
   describe "#chef_cache_path" do
     it "sets the path" do
-      remote_config.chef_cache_path.should == "/var/chef/cache"
+      expect(remote_config.chef_cache_path).to eq("/var/chef/cache")
     end
 
     it "creates the path remotely" do
       commands_for(:chef_cache_path).tap do |commands|
         expect(commands.size).to eq(1)
-        commands.first.should =~ /mkdir .*? -p \/var\/chef\/cache$/
+        expect(commands.first).to match(/mkdir .*? -p \/var\/chef\/cache$/)
       end
     end
   end
@@ -71,13 +71,13 @@ describe Soloist::RemoteConfig do
   describe "#cookbook_paths" do
     it "sets the path" do
       expect(remote_config.cookbook_paths.size).to eq(1)
-      remote_config.cookbook_paths.should =~ ["/var/chef/cookbooks"]
+      expect(remote_config.cookbook_paths).to match_array(["/var/chef/cookbooks"])
     end
 
     it "creates the path remotely" do
       commands_for(:cookbook_paths).tap do |commands|
         expect(commands.size).to eq(1)
-        commands.first.should =~ /mkdir .*? -p \/var\/chef\/cookbooks$/
+        expect(commands.first).to match(/mkdir .*? -p \/var\/chef\/cookbooks$/)
       end
     end
   end
