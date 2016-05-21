@@ -24,8 +24,8 @@ Gem::Specification.new do |s|
   # chef 12.9.x and chef-zero 4.6.x dropped support for Ruby 2.0.x, which is
   # El Capitan's system ruby. Gem versions are being locked to allow soloist
   # to run with system Ruby.
-  s.add_dependency "chef", "~> 12.8.1"
-  s.add_dependency "chef-zero", "~> 4.5.0"
+  s.add_dependency "chef"
+  s.add_dependency "chef-zero"
   s.add_dependency "bundler"
 
   s.add_dependency "librarian-chef"
