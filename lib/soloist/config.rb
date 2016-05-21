@@ -20,7 +20,7 @@ module Soloist
     end
 
     def chef_solo
-      "chef-solo -c '#{solo_rb_path}' -l '#{log_level}'"
+      "bundle exec chef-solo -c '#{solo_rb_path}' -l '#{log_level}'"
     end
 
     def as_solo_rb
