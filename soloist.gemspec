@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   # to run with system Ruby.
   s.add_dependency "chef", "~> 12.8.1"
   s.add_dependency "chef-zero", "~> 4.5.0"
+  s.add_dependency "bundler"
 
   s.add_dependency "librarian-chef"
   s.add_dependency "thor"

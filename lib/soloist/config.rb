@@ -1,3 +1,4 @@
+require "bundler"
 require "soloist/royal_crown"
 require "tempfile"
 
@@ -16,7 +17,9 @@ module Soloist
     end
 
     def run_chef
-      exec(conditional_sudo("bash -c '#{chef_solo}'"))
+      Bundler.with_clean_env do
+        exec(conditional_sudo("bash -c '#{chef_solo}'"))
+      end
     end
 
     def chef_solo
