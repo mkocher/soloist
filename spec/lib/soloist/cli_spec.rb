@@ -14,11 +14,11 @@ RSpec.describe Soloist::CLI do
     it "receives the outside environment" do
       FileUtils.touch(soloistrc_path)
       Dir.chdir(base_path) do
-        ENV["AUTREYISM"] = "pathological-yodeling"
+        ENV["AUTRYITIS"] = "yodelmania"
         expect(cli.soloist_config).to receive(:exec) do |chef_solo|
-          expect(`#{chef_solo}`.chomp).to eq("pathological-yodeling")
+          expect(chef_solo).to include("echo $AUTRYITIS")
         end
-        allow(cli.soloist_config).to receive(:chef_solo).and_return('echo $AUTREYISM')
+        allow(cli.soloist_config).to receive(:chef_solo).and_return('echo $AUTRYITIS')
         cli.chef
       end
     end
