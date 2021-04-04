@@ -28,6 +28,7 @@ module Soloist
         file_cache_path "#{chef_cache_path}"
         cookbook_path #{cookbook_paths.inspect}
         json_attribs "#{node_json_path}"
+        ohai.optional_plugins = [ :Passwd ] if ohai.respond_to?(:optional_plugins)
       SOLO_RB
     end
 

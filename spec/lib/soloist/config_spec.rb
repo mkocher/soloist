@@ -12,6 +12,7 @@ RSpec.describe Soloist::Config do
 
     it { should include 'file_cache_path "/var/chef/cache"' }
     it { should include %(json_attribs "#{config.node_json_path}") }
+    it { should include 'ohai.optional_plugins = [ :Passwd ] if ohai.respond_to?(:optional_plugins)' }
   end
 
   describe "#cookbook_paths" do
